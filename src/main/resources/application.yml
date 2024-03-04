@@ -1,0 +1,91 @@
+spring:
+  jpa:
+    open-in-view: false
+  datasource:
+    username: root
+    password: wusi20150402
+    url: jdbc:mysql://43.142.106.205/taobao?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 30000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      web-stat-filter:
+        enabled: true
+        url-pattern: '/*'
+        exclusions: '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*'
+        session-stat-enable: true
+  redis:
+    host: 43.142.106.205
+    port: 6379
+    password: wusi20150402
+    timeout: 3000ms
+    database: 0
+    lettuce:
+      pool:
+        max-wait: 2000ms
+        min-idle: 50
+        max-idle: 100
+        max-active: 200
+  mail:
+    host: smtp.qq.com
+    username: 513936307@qq.com
+    password: gomlsnqhyiekbjba
+    from: 513936307@qq.com
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          port: 465
+          starttls:
+            enable: true
+            required: true
+    default-encoding: utf-8
+  application:
+    name: captcha-service
+
+excelDownloadUrl: http://43.142.106.205:8083/downloadExcel/
+server:
+  port: 8083
+mybatis:
+  mapper-locations: classpath:com/wusi/reimbursement/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+web:
+  server: http://49.233.192.222:8083
+upload:
+  qiniu:
+    bucket: daningmeng001
+    accessKey: dJR8UzN31Iy8-yzRlBR3TBrkOe1RUdMNp0yZM_9k
+    secretKey: l1uLDn9umthxCvqCrKRsAYqriucp0uIJciDcV4Jz
+    host: http://www.picture.lureking.cn/
+activemq: #MQ消息中间件
+  broker-url: failover:(tcp://43.142.106.205:61616)
+  user: root
+  password: wusi20150402
+  enabled: true
+  max-connections: 50
+  expiry-timeout: 10000
+  idle-timeout: 30000
+#右下角水印字体(宋体)；
+aj:
+  captcha:
+    water-font: \u5b8b\u4f53
+    water-mark: \u6e56\u5317\u70b9\u8d5e
+    font-type: \u5b8b\u4f53
+    slip-offset: 2
+    # aes加密坐标开启或者禁用(true|false)
+    aes-status: true
+operateInfo:
+  salt: 2db4d016dbd2aa65

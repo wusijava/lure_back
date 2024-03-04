@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.ProductNewMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.ProductNew">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="model" property="model" jdbcType="VARCHAR"/>
+            <result column="amy_url" property="amyUrl" jdbcType="VARCHAR"/>
+            <result column="my_url" property="myUrl" jdbcType="VARCHAR"/>
+            <result column="amy_state" property="amyState" jdbcType="VARCHAR"/>
+            <result column="my_state" property="myState" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="image" property="image" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">product_new</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `model`,
+            `amy_url`,
+            `my_url`,
+            `amy_state`,
+            `my_state`,
+            `create_time`,
+            `image`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="model != null and model != ''">
+                        AND `model` like "%"#{model}"%"
+                    </if>
+                    <if test="amyUrl != null and amyUrl != ''">
+                        AND `amy_url`=#{amyUrl}
+                    </if>
+                    <if test="myUrl != null and myUrl != ''">
+                        AND `my_url`=#{myUrl}
+                    </if>
+                    <if test="amyState != null and amyState != ''">
+                        AND `amy_state`=#{amyState}
+                    </if>
+                    <if test="myState != null and myState != ''">
+                        AND `my_state`=#{myState}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="image != null and image != ''">
+                        AND `image`=#{image}
+                    </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.ProductNew" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `model`,
+            `amy_url`,
+            `my_url`,
+            `amy_state`,
+            `my_state`,
+            `create_time`,
+            `image`
+        )
+        VALUES(
+            #{id},
+            #{model},
+            #{amyUrl},
+            #{myUrl},
+            #{amyState},
+            #{myState},
+            #{createTime},
+            #{image}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `model`,
+            `amy_url`,
+            `my_url`,
+            `amy_state`,
+            `my_state`,
+            `create_time`,
+            `image`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.model},
+            #{cm.amyUrl},
+            #{cm.myUrl},
+            #{cm.amyState},
+            #{cm.myState},
+            #{cm.createTime},
+            #{cm.image}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.ProductNew">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="model != null and model != ''">
+                 `model`=#{model},
+            </if>
+            <if test="amyUrl != null and amyUrl != ''">
+                 `amy_url`=#{amyUrl},
+            </if>
+            <if test="myUrl != null and myUrl != ''">
+                 `my_url`=#{myUrl},
+            </if>
+            <if test="amyState != null and amyState != ''">
+                 `amy_state`=#{amyState},
+            </if>
+            <if test="myState != null and myState != ''">
+                 `my_state`=#{myState},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="image != null and image != ''">
+                 `image`=#{image},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

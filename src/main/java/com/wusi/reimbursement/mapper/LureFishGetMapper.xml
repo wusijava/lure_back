@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.LureFishGetMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.LureFishGet">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="fish_kind" property="fishKind" jdbcType="VARCHAR"/>
+            <result column="weight" property="weight" jdbcType="VARCHAR"/>
+            <result column="length" property="length" jdbcType="VARCHAR"/>
+            <result column="use" property="use" jdbcType="INTEGER"/>
+            <result column="lure" property="lure" jdbcType="VARCHAR"/>
+            <result column="province" property="province" jdbcType="VARCHAR"/>
+            <result column="city" property="city" jdbcType="VARCHAR"/>
+            <result column="district" property="district" jdbcType="VARCHAR"/>
+            <result column="lng" property="lng" jdbcType="VARCHAR"/>
+            <result column="lat" property="lat" jdbcType="VARCHAR"/>
+            <result column="address" property="address" jdbcType="VARCHAR"/>
+            <result column="image_url" property="imageUrl" jdbcType="VARCHAR"/>
+            <result column="video_url" property="videoUrl" jdbcType="VARCHAR"/>
+            <result column="cond_txt_day" property="condTxtDay" jdbcType="VARCHAR"/>
+            <result column="cond_txt_night" property="condTxtNight" jdbcType="VARCHAR"/>
+            <result column="hum" property="hum" jdbcType="VARCHAR"/>
+            <result column="pres" property="pres" jdbcType="VARCHAR"/>
+            <result column="sun_rise" property="sunRise" jdbcType="VARCHAR"/>
+            <result column="sun_set" property="sunSet" jdbcType="VARCHAR"/>
+            <result column="tmp_max" property="tmpMax" jdbcType="VARCHAR"/>
+            <result column="tmp_min" property="tmpMin" jdbcType="VARCHAR"/>
+            <result column="wind_dir" property="windDir" jdbcType="VARCHAR"/>
+            <result column="wind_dc" property="windDc" jdbcType="VARCHAR"/>
+            <result column="wind_spd" property="windSpd" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+            <result column="uid" property="uid" jdbcType="VARCHAR"/>
+            <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+            <result column="get_fish" property="getFish" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="table">lure_fish_get</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `fish_kind`,
+            `weight`,
+            `length`,
+            `use`,
+            `lure`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `image_url`,
+            `video_url`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `hum`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_dc`,
+            `wind_spd`,
+            `create_time`,
+            `remark`,
+            uid,
+            user_name,
+            `get_fish`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="fishKind != null and fishKind != ''">
+                        AND `fish_kind`=#{fishKind}
+                    </if>
+                    <if test="weight != null and weight != ''">
+                        AND `weight`=#{weight}
+                    </if>
+                    <if test="length != null and length != ''">
+                        AND `length`=#{length}
+                    </if>
+                    <if test="use != null and use != ''">
+                        AND `use`=#{use}
+                    </if>
+                    <if test="lure != null and lure != ''">
+                        AND `lure`=#{lure}
+                    </if>
+                    <if test="province != null and province != ''">
+                        AND `province`=#{province}
+                    </if>
+                    <if test="city != null and city != ''">
+                        AND `city`=#{city}
+                    </if>
+                    <if test="district != null and district != ''">
+                        AND `district`=#{district}
+                    </if>
+                    <if test="lng != null and lng != ''">
+                        AND `lng`=#{lng}
+                    </if>
+                    <if test="lat != null and lat != ''">
+                        AND `lat`=#{lat}
+                    </if>
+                    <if test="address != null and address != ''">
+                        AND `address`=#{address}
+                    </if>
+                    <if test="imageUrl != null and imageUrl != ''">
+                        AND `image_url`=#{imageUrl}
+                    </if>
+                    <if test="videoUrl != null and videoUrl != ''">
+                        AND `video_url`=#{videoUrl}
+                    </if>
+                    <if test="condTxtDay != null and condTxtDay != ''">
+                        AND `cond_txt_day`=#{condTxtDay}
+                    </if>
+                    <if test="condTxtNight != null and condTxtNight != ''">
+                        AND `cond_txt_night`=#{condTxtNight}
+                    </if>
+                    <if test="hum != null and hum != ''">
+                        AND `hum`=#{hum}
+                    </if>
+                    <if test="pres != null and pres != ''">
+                        AND `pres`=#{pres}
+                    </if>
+                    <if test="sunRise != null and sunRise != ''">
+                        AND `sun_rise`=#{sunRise}
+                    </if>
+                    <if test="sunSet != null and sunSet != ''">
+                        AND `sun_set`=#{sunSet}
+                    </if>
+                    <if test="tmpMax != null and tmpMax != ''">
+                        AND `tmp_max`=#{tmpMax}
+                    </if>
+                    <if test="tmpMin != null and tmpMin != ''">
+                        AND `tmp_min`=#{tmpMin}
+                    </if>
+                    <if test="windDir != null and windDir != ''">
+                        AND `wind_dir`=#{windDir}
+                    </if>
+                    <if test="windDc != null and windDc != ''">
+                        AND `wind_dc`=#{windDc}
+                    </if>
+                    <if test="windSpd != null and windSpd != ''">
+                        AND `wind_spd`=#{windSpd}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+                    <if test="getFish != null ">
+                        AND `get_fish`=#{getFish}
+                    </if>
+                <if test="uid != null and uid != ''">
+                    AND `uid`=#{uid}
+                </if>
+                <if test="userName != null and userName != ''">
+                    AND `user_name`=#{userName}
+                </if>
+                <if test="notUid != null and notUid != ''">
+                    AND `uid`!=#{notUid}
+                </if>
+                <if test="time != null and time != ''">
+                    and DATE_FORMAT(create_time,'%Y-%m-%d') =#{time}
+                </if>
+            </trim>
+        </where>
+        order by create_time desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.LureFishGet" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `fish_kind`,
+            `weight`,
+            `length`,
+            `use`,
+            `lure`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `image_url`,
+            `video_url`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `hum`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_dc`,
+            `wind_spd`,
+            `create_time`,
+            `remark`,
+            `get_fish`,
+            uid,
+            user_name
+        )
+        VALUES(
+            #{id},
+            #{fishKind},
+            #{weight},
+            #{length},
+            #{use},
+            #{lure},
+            #{province},
+            #{city},
+            #{district},
+            #{lng},
+            #{lat},
+            #{address},
+            #{imageUrl},
+            #{videoUrl},
+            #{condTxtDay},
+            #{condTxtNight},
+            #{hum},
+            #{pres},
+            #{sunRise},
+            #{sunSet},
+            #{tmpMax},
+            #{tmpMin},
+            #{windDir},
+            #{windDc},
+            #{windSpd},
+            #{createTime},
+            #{remark},
+            #{getFish},
+            #{uid},
+            #{userName}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `fish_kind`,
+            `weight`,
+            `length`,
+            `use`,
+            `lure`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `image_url`,
+            `video_url`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `hum`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_dc`,
+            `wind_spd`,
+            `create_time`,
+            `remark`,
+            `get_fish`,
+            uid,
+            user_name
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.fishKind},
+            #{cm.weight},
+            #{cm.length},
+            #{cm.use},
+            #{cm.lure},
+            #{cm.province},
+            #{cm.city},
+            #{cm.district},
+            #{cm.lng},
+            #{cm.lat},
+            #{cm.address},
+            #{cm.imageUrl},
+            #{cm.videoUrl},
+            #{cm.condTxtDay},
+            #{cm.condTxtNight},
+            #{cm.hum},
+            #{cm.pres},
+            #{cm.sunRise},
+            #{cm.sunSet},
+            #{cm.tmpMax},
+            #{cm.tmpMin},
+            #{cm.windDir},
+            #{cm.windDc},
+            #{cm.windSpd},
+            #{cm.createTime},
+            #{cm.remark},
+            #{cm.getFish},
+            #{cm.uid},
+            #{cm.userName}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        order by create_time desc
+    </select>
+    <select id="fishCount" resultType="com.wusi.reimbursement.vo.FishCount" parameterType="java.lang.String">
+
+      SELECT fish_kind as fishName,count(id)  as num FROM lure_fish_get
+        <where>
+            <trim prefixOverrides="and">
+                <if test="monthStr != null and monthStr != ''">
+                    AND DATE_FORMAT(create_time,'%Y-%m') = #{monthStr}
+                </if>
+            </trim>
+            and get_fish =1 and uid = #{uid}
+        </where>
+      GROUP BY fish_kind  ORDER BY count(id) desc
+    </select>
+    <select id="queryByType" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        where get_fish =1
+        <if test="type != null and type =='year'">
+            and DATE_FORMAT(create_time,'%Y') = #{time}
+        </if>
+        <if test="type != null and type =='month'">
+            and DATE_FORMAT(create_time,'%Y-%m') = #{time}
+        </if>
+    </select>
+    <select id="monthCount" resultType="com.wusi.reimbursement.vo.MonthCount" parameterType="java.lang.String">
+
+      SELECT DATE_FORMAT(create_time,'%Y-%m') as 'month',count(*) as num FROM lure_fish_get where get_fish =1  and uid= #{uid} GROUP BY DATE_FORMAT(create_time,'%Y-%m') order by DATE_FORMAT(create_time,'%Y-%m') desc
+    </select>
+
+    <select id="getnum" resultType="java.lang.Integer" parameterType="java.lang.String">
+
+      SELECT count(*)  FROM lure_fish_get  where DATE_FORMAT(create_time,'%Y-%m-%d') = #{str} and get_fish =1 and uid=#{uid}
+    </select>
+    <select id="queryByMonth" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <if test="type != null and type == 'month'">
+            where DATE_FORMAT(create_time,'%Y-%m') = #{format}
+        </if>
+        <if test="type != null and type == 'year'">
+            where DATE_FORMAT(create_time,'%Y') = #{format}
+        </if>
+
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureFishGet">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="fishKind != null and fishKind != ''">
+                 `fish_kind`=#{fishKind},
+            </if>
+            <if test="weight != null and weight != ''">
+                 `weight`=#{weight},
+            </if>
+            <if test="length != null and length != ''">
+                 `length`=#{length},
+            </if>
+            <if test="use != null and use != ''">
+                 `use`=#{use},
+            </if>
+            <if test="lure != null and lure != ''">
+                 `lure`=#{lure},
+            </if>
+            <if test="province != null and province != ''">
+                 `province`=#{province},
+            </if>
+            <if test="city != null and city != ''">
+                 `city`=#{city},
+            </if>
+            <if test="district != null and district != ''">
+                 `district`=#{district},
+            </if>
+            <if test="lng != null and lng != ''">
+                 `lng`=#{lng},
+            </if>
+            <if test="lat != null and lat != ''">
+                 `lat`=#{lat},
+            </if>
+            <if test="address != null and address != ''">
+                 `address`=#{address},
+            </if>
+            <if test="imageUrl != null and imageUrl != ''">
+                 `image_url`=#{imageUrl},
+            </if>
+            <if test="videoUrl != null and videoUrl != ''">
+                 `video_url`=#{videoUrl},
+            </if>
+            <if test="condTxtDay != null and condTxtDay != ''">
+                 `cond_txt_day`=#{condTxtDay},
+            </if>
+            <if test="condTxtNight != null and condTxtNight != ''">
+                 `cond_txt_night`=#{condTxtNight},
+            </if>
+            <if test="hum != null and hum != ''">
+                 `hum`=#{hum},
+            </if>
+            <if test="pres != null and pres != ''">
+                 `pres`=#{pres},
+            </if>
+            <if test="sunRise != null and sunRise != ''">
+                 `sun_rise`=#{sunRise},
+            </if>
+            <if test="sunSet != null and sunSet != ''">
+                 `sun_set`=#{sunSet},
+            </if>
+            <if test="tmpMax != null and tmpMax != ''">
+                 `tmp_max`=#{tmpMax},
+            </if>
+            <if test="tmpMin != null and tmpMin != ''">
+                 `tmp_min`=#{tmpMin},
+            </if>
+            <if test="windDir != null and windDir != ''">
+                 `wind_dir`=#{windDir},
+            </if>
+            <if test="windDc != null and windDc != ''">
+                 `wind_dc`=#{windDc},
+            </if>
+            <if test="windSpd != null and windSpd != ''">
+                 `wind_spd`=#{windSpd},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+            <if test="remark != null">
+                `get_fish`=#{getFish},
+            </if>
+            <if test="uid != null and uid != ''">
+                `uid`=#{uid},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from
+        <include refid="table"/>
+        WHERE
+        id=#{id}
+    </delete>
+</mapper>

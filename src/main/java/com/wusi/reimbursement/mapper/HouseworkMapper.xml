@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.HouseworkMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.Housework">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="user_name_by" property="userNameBy" jdbcType="VARCHAR"/>
+            <result column="user_name_to" property="userNameTo" jdbcType="VARCHAR"/>
+            <result column="content" property="content" jdbcType="VARCHAR"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+            <result column="receive_state" property="receiveState" jdbcType="INTEGER"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+            <result column="score" property="score" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="required_finish_time" property="requiredFinishTime" jdbcType="TIMESTAMP"/>
+            <result column="reality_finish_time" property="realityFinishTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">housework</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `user_name_by`,
+            `user_name_to`,
+            `content`,
+            `remark`,
+            `receive_state`,
+            `state`,
+            `score`,
+            `create_time`,
+            `required_finish_time`,
+            `reality_finish_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="userNameBy != null and userNameBy != ''">
+                        AND `user_name_by`=#{userNameBy}
+                    </if>
+                    <if test="userNameTo != null and userNameTo != ''">
+                        AND `user_name_to`=#{userNameTo}
+                    </if>
+                    <if test="content != null and content != ''">
+                        AND `content`=#{content}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+                    <if test="receiveState != null">
+                        AND `receive_state`=#{receiveState}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="score != null and score != ''">
+                        AND `score`=#{score}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="requiredFinishTime != null">
+                        AND `required_finish_time`=#{requiredFinishTime}
+                    </if>
+                    <if test="realityFinishTime != null">
+                        AND `reality_finish_time`=#{realityFinishTime}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.Housework" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `user_name_by`,
+            `user_name_to`,
+            `content`,
+            `remark`,
+            `receive_state`,
+            `state`,
+            `score`,
+            `create_time`,
+            `required_finish_time`,
+            `reality_finish_time`
+        )
+        VALUES(
+            #{id},
+            #{userNameBy},
+            #{userNameTo},
+            #{content},
+            #{remark},
+            #{receiveState},
+            #{state},
+            #{score},
+            #{createTime},
+            #{requiredFinishTime},
+            #{realityFinishTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `user_name_by`,
+            `user_name_to`,
+            `content`,
+            `remark`,
+            `receive_state`,
+            `state`,
+            `score`,
+            `create_time`,
+            `required_finish_time`,
+            `reality_finish_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.userNameBy},
+            #{cm.userNameTo},
+            #{cm.content},
+            #{cm.remark},
+            #{cm.receiveState},
+            #{cm.state},
+            #{cm.score},
+            #{cm.createTime},
+            #{cm.requiredFinishTime},
+            #{cm.realityFinishTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.Housework">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="userNameBy != null and userNameBy != ''">
+                 `user_name_by`=#{userNameBy},
+            </if>
+            <if test="userNameTo != null and userNameTo != ''">
+                 `user_name_to`=#{userNameTo},
+            </if>
+            <if test="content != null and content != ''">
+                 `content`=#{content},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+            <if test="receiveState != null">
+                 `receive_state`=#{receiveState},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="score != null and score != ''">
+                 `score`=#{score},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="requiredFinishTime != null">
+                 `required_finish_time`=#{requiredFinishTime},
+            </if>
+            <if test="realityFinishTime != null">
+                 `reality_finish_time`=#{realityFinishTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

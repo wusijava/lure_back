@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.User">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="username" property="username" jdbcType="VARCHAR"/>
+            <result column="password" property="password" jdbcType="VARCHAR"/>
+            <result column="mobile" property="mobile" jdbcType="VARCHAR"/>
+            <result column="nick_name" property="nickName" jdbcType="VARCHAR"/>
+            <result column="uid" property="uid" jdbcType="VARCHAR"/>
+            <result column="salt" property="salt" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="BIGINT"/>
+            <result column="type" property="type" jdbcType="BIGINT"/>
+            <result column="store_mark_code" property="storeMarkCode" jdbcType="VARCHAR"/>
+            <result column="pwd" property="pwd" jdbcType="VARCHAR"/>
+            <result column="city_code" property="cityCode" jdbcType="VARCHAR"/>
+            <result column="province_code" property="provinceCode" jdbcType="VARCHAR"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">user</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `username`,
+            `password`,
+            `mobile`,
+            `nick_name`,
+            `uid`,
+            `salt`,
+            `state`,
+            `type`,
+            `store_mark_code`,
+            `pwd`,
+            `city_code`,
+            `province_code`,
+            `remark`,
+            create_time
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="username != null and username != ''">
+                        AND `username`=#{username}
+                    </if>
+                    <if test="password != null and password != ''">
+                        AND `password`=#{password}
+                    </if>
+                    <if test="mobile != null and mobile != ''">
+                        AND `mobile`=#{mobile}
+                    </if>
+                    <if test="nickName != null and nickName != ''">
+                        AND `nick_name`=#{nickName}
+                    </if>
+                    <if test="uid != null and uid != ''">
+                        AND `uid`=#{uid}
+                    </if>
+                    <if test="salt != null and salt != ''">
+                        AND `salt`=#{salt}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="type != null">
+                        AND `type`=#{type}
+                    </if>
+                    <if test="storeMarkCode != null and storeMarkCode != ''">
+                        AND `store_mark_code`=#{storeMarkCode}
+                    </if>
+                    <if test="pwd != null and pwd != ''">
+                        AND `pwd`=#{pwd}
+                    </if>
+                    <if test="cityCode != null and cityCode != ''">
+                        AND `city_code`=#{cityCode}
+                    </if>
+                    <if test="provinceCode != null and provinceCode != ''">
+                        AND `province_code`=#{provinceCode}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+                <if test="createTime != null and createTime != ''">
+                    AND `create_time`=#{createTime}
+                </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.User" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `username`,
+            `password`,
+            `mobile`,
+            `nick_name`,
+            `uid`,
+            `salt`,
+            `state`,
+            `type`,
+            `store_mark_code`,
+            `pwd`,
+            `city_code`,
+            `province_code`,
+            `remark`,
+            create_time
+        )
+        VALUES(
+            #{id},
+            #{username},
+            #{password},
+            #{mobile},
+            #{nickName},
+            #{uid},
+            #{salt},
+            #{state},
+            #{type},
+            #{storeMarkCode},
+            #{pwd},
+            #{cityCode},
+            #{provinceCode},
+            #{remark},
+            #{createTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `username`,
+            `password`,
+            `mobile`,
+            `nick_name`,
+            `uid`,
+            `salt`,
+            `state`,
+            `type`,
+            `store_mark_code`,
+            `pwd`,
+            `city_code`,
+            `province_code`,
+            `remark`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.username},
+            #{cm.password},
+            #{cm.mobile},
+            #{cm.nickName},
+            #{cm.uid},
+            #{cm.salt},
+            #{cm.state},
+            #{cm.type},
+            #{cm.storeMarkCode},
+            #{cm.pwd},
+            #{cm.cityCode},
+            #{cm.provinceCode},
+            #{cm.remark}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+    <select id="findByUsername" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE username=#{username} ORDER BY id DESC LIMIT 1
+    </select>
+
+    <select id="findByUid" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE uid=#{uid} ORDER BY id DESC LIMIT 1
+    </select>
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.User">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="username != null and username != ''">
+                 `username`=#{username},
+            </if>
+            <if test="password != null and password != ''">
+                 `password`=#{password},
+            </if>
+            <if test="mobile != null and mobile != ''">
+                 `mobile`=#{mobile},
+            </if>
+            <if test="nickName != null and nickName != ''">
+                 `nick_name`=#{nickName},
+            </if>
+            <if test="uid != null and uid != ''">
+                 `uid`=#{uid},
+            </if>
+            <if test="salt != null and salt != ''">
+                 `salt`=#{salt},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="type != null">
+                 `type`=#{type},
+            </if>
+            <if test="storeMarkCode != null and storeMarkCode != ''">
+                 `store_mark_code`=#{storeMarkCode},
+            </if>
+            <if test="pwd != null and pwd != ''">
+                 `pwd`=#{pwd},
+            </if>
+            <if test="cityCode != null and cityCode != ''">
+                 `city_code`=#{cityCode},
+            </if>
+            <if test="provinceCode != null and provinceCode != ''">
+                 `province_code`=#{provinceCode},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.SsqMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.Ssq">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="term" property="term" jdbcType="VARCHAR"/>
+            <result column="red1" property="red1" jdbcType="VARCHAR"/>
+            <result column="red2" property="red2" jdbcType="VARCHAR"/>
+            <result column="red3" property="red3" jdbcType="VARCHAR"/>
+            <result column="red4" property="red4" jdbcType="VARCHAR"/>
+            <result column="red5" property="red5" jdbcType="VARCHAR"/>
+            <result column="red6" property="red6" jdbcType="VARCHAR"/>
+            <result column="blue" property="blue" jdbcType="VARCHAR"/>
+            <result column="bonus" property="bonus" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="bonus_time" property="bonusTime" jdbcType="TIMESTAMP"/>
+            <result column="is_bonus" property="isBonus" jdbcType="VARCHAR"/>
+            <result column="is_receive" property="isReceive" jdbcType="VARCHAR"/>
+            <result column="week" property="week" jdbcType="VARCHAR"/>
+            <result column="num" property="num" jdbcType="VARCHAR"/>
+            <result column="red_num" property="redNum" jdbcType="VARCHAR"/>
+            <result column="blue_num" property="blueNum" jdbcType="VARCHAR"/>
+            <result column="user" property="user" jdbcType="VARCHAR"/>
+            <result column="type" property="type" jdbcType="INTEGER"/>
+            <result column="buyer" property="buyer" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+            <result column="rate" property="rate" jdbcType="VARCHAR"/>
+            <result column="commission" property="commission" jdbcType="VARCHAR"/>
+            <result column="reason" property="reason" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">ssq</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `term`,
+            `red1`,
+            `red2`,
+            `red3`,
+            `red4`,
+            `red5`,
+            `red6`,
+            `blue`,
+            `bonus`,
+            `create_time`,
+            `bonus_time`,
+            `is_bonus`,
+            `is_receive`,
+            `week`,
+            `num`,
+            `red_num`,
+            `blue_num`,
+            `user`,
+            `type`,
+            `buyer`,
+            `state`,
+            `rate`,
+            `commission`,
+            `reason`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="term != null and term != ''">
+                        AND `term`=#{term}
+                    </if>
+                    <if test="red1 != null and red1 != ''">
+                        AND `red1`=#{red1}
+                    </if>
+                    <if test="red2 != null and red2 != ''">
+                        AND `red2`=#{red2}
+                    </if>
+                    <if test="red3 != null and red3 != ''">
+                        AND `red3`=#{red3}
+                    </if>
+                    <if test="red4 != null and red4 != ''">
+                        AND `red4`=#{red4}
+                    </if>
+                    <if test="red5 != null and red5 != ''">
+                        AND `red5`=#{red5}
+                    </if>
+                    <if test="red6 != null and red6 != ''">
+                        AND `red6`=#{red6}
+                    </if>
+                    <if test="blue != null and blue != ''">
+                        AND `blue`=#{blue}
+                    </if>
+                    <if test="bonus != null and bonus != ''">
+                        AND `bonus`=#{bonus}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="bonusTime != null">
+                        AND `bonus_time`=#{bonusTime}
+                    </if>
+                    <if test="isBonus != null and isBonus != ''">
+                        AND `is_bonus`=#{isBonus}
+                    </if>
+                    <if test="isReceive != null and isReceive != ''">
+                        AND `is_receive`=#{isReceive}
+                    </if>
+                    <if test="week != null and week != ''">
+                        AND `week`=#{week}
+                    </if>
+                    <if test="num != null and num != ''">
+                        AND `num`=#{num}
+                    </if>
+                    <if test="redNum != null and redNum != ''">
+                        AND `red_num`=#{redNum}
+                    </if>
+                    <if test="blueNum != null and blueNum != ''">
+                        AND `blue_num`=#{blueNum}
+                    </if>
+                    <if test="user != null and user != ''">
+                        AND `user`=#{user}
+                    </if>
+                    <if test="type != null">
+                        AND `type`=#{type}
+                    </if>
+                    <if test="buyer != null and buyer != ''">
+                        AND `buyer`=#{buyer}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="rate != null and rate != ''">
+                        AND `rate`=#{rate}
+                    </if>
+                    <if test="commission != null and commission != ''">
+                        AND `commission`=#{commission}
+                    </if>
+                    <if test="reason != null and reason != ''">
+                        AND `reason`=#{reason}
+                    </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.Ssq" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `term`,
+            `red1`,
+            `red2`,
+            `red3`,
+            `red4`,
+            `red5`,
+            `red6`,
+            `blue`,
+            `bonus`,
+            `create_time`,
+            `bonus_time`,
+            `is_bonus`,
+            `is_receive`,
+            `week`,
+            `num`,
+            `red_num`,
+            `blue_num`,
+            `user`,
+            `type`,
+            `buyer`,
+            `state`,
+            `rate`,
+            `commission`,
+            `reason`
+        )
+        VALUES(
+            #{id},
+            #{term},
+            #{red1},
+            #{red2},
+            #{red3},
+            #{red4},
+            #{red5},
+            #{red6},
+            #{blue},
+            #{bonus},
+            #{createTime},
+            #{bonusTime},
+            #{isBonus},
+            #{isReceive},
+            #{week},
+            #{num},
+            #{redNum},
+            #{blueNum},
+            #{user},
+            #{type},
+            #{buyer},
+            #{state},
+            #{rate},
+            #{commission},
+            #{reason}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `term`,
+            `red1`,
+            `red2`,
+            `red3`,
+            `red4`,
+            `red5`,
+            `red6`,
+            `blue`,
+            `bonus`,
+            `create_time`,
+            `bonus_time`,
+            `is_bonus`,
+            `is_receive`,
+            `week`,
+            `num`,
+            `red_num`,
+            `blue_num`,
+            `user`,
+            `type`,
+            `buyer`,
+            `state`,
+            `rate`,
+            `commission`,
+            `reason`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.term},
+            #{cm.red1},
+            #{cm.red2},
+            #{cm.red3},
+            #{cm.red4},
+            #{cm.red5},
+            #{cm.red6},
+            #{cm.blue},
+            #{cm.bonus},
+            #{cm.createTime},
+            #{cm.bonusTime},
+            #{cm.isBonus},
+            #{cm.isReceive},
+            #{cm.week},
+            #{cm.num},
+            #{cm.redNum},
+            #{cm.blueNum},
+            #{cm.user},
+            #{cm.type},
+            #{cm.buyer},
+            #{cm.state},
+            #{cm.rate},
+            #{cm.commission},
+            #{cm.reason}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+    <select id="querycount" resultType="java.lang.Long">
+        select COUNT(*) FROM (select term from ssq
+        <where>
+        <trim prefixOverrides="and">
+            <if test="buyer != null and buyer != ''">
+                AND `buyer`=#{buyer}
+            </if>
+        </trim>
+        </where>
+        GROUP BY term) a
+    </select>
+    <select id="getValue" resultType="java.util.Map">
+        select sum(bonus*num) as bonus ,sum(num) as count FROM ssq
+    </select>
+    <select id="queryListByParam" resultMap="BaseResultMap">
+        SELECT DISTINCT term FROM `ssq`
+        <where>
+            <if test="buyer != null and buyer != ''">
+                `buyer`=#{buyer}
+            </if>
+         </where>
+         ORDER BY term desc limit #{page},#{limit}
+    </select>
+    <select id="getCommission" resultType="java.lang.String">
+        select sum(commission) from ssq where buyer =#{buyer}
+    </select>
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.Ssq">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="term != null and term != ''">
+                 `term`=#{term},
+            </if>
+            <if test="red1 != null and red1 != ''">
+                 `red1`=#{red1},
+            </if>
+            <if test="red2 != null and red2 != ''">
+                 `red2`=#{red2},
+            </if>
+            <if test="red3 != null and red3 != ''">
+                 `red3`=#{red3},
+            </if>
+            <if test="red4 != null and red4 != ''">
+                 `red4`=#{red4},
+            </if>
+            <if test="red5 != null and red5 != ''">
+                 `red5`=#{red5},
+            </if>
+            <if test="red6 != null and red6 != ''">
+                 `red6`=#{red6},
+            </if>
+            <if test="blue != null and blue != ''">
+                 `blue`=#{blue},
+            </if>
+            <if test="bonus != null and bonus != ''">
+                 `bonus`=#{bonus},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="bonusTime != null">
+                 `bonus_time`=#{bonusTime},
+            </if>
+            <if test="isBonus != null and isBonus != ''">
+                 `is_bonus`=#{isBonus},
+            </if>
+            <if test="isReceive != null and isReceive != ''">
+                 `is_receive`=#{isReceive},
+            </if>
+            <if test="week != null and week != ''">
+                 `week`=#{week},
+            </if>
+            <if test="num != null and num != ''">
+                 `num`=#{num},
+            </if>
+            <if test="redNum != null and redNum != ''">
+                 `red_num`=#{redNum},
+            </if>
+            <if test="blueNum != null and blueNum != ''">
+                 `blue_num`=#{blueNum},
+            </if>
+            <if test="user != null and user != ''">
+                 `user`=#{user},
+            </if>
+            <if test="type != null">
+                 `type`=#{type},
+            </if>
+            <if test="buyer != null and buyer != ''">
+                 `buyer`=#{buyer},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="rate != null and rate != ''">
+                 `rate`=#{rate},
+            </if>
+            <if test="commission != null and commission != ''">
+                 `commission`=#{commission},
+            </if>
+            <if test="reason != null and reason != ''">
+                 `reason`=#{reason},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

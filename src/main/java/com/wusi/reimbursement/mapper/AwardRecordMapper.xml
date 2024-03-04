@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.AwardRecordMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.AwardRecord">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="award_name" property="awardName" jdbcType="VARCHAR"/>
+            <result column="type" property="type" jdbcType="INTEGER"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+            <result column="user_to" property="userTo" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">award_record</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `award_name`,
+            `type`,
+            `state`,
+            `user_to`,
+            `create_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="awardName != null and awardName != ''">
+                        AND `award_name`=#{awardName}
+                    </if>
+                    <if test="type != null">
+                        AND `type`=#{type}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="userTo != null and userTo != ''">
+                        AND `user_to`=#{userTo}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.AwardRecord" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `award_name`,
+            `type`,
+            `state`,
+            `user_to`,
+            `create_time`
+        )
+        VALUES(
+            #{id},
+            #{awardName},
+            #{type},
+            #{state},
+            #{userTo},
+            #{createTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `award_name`,
+            `type`,
+            `state`,
+            `user_to`,
+            `create_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.awardName},
+            #{cm.type},
+            #{cm.state},
+            #{cm.userTo},
+            #{cm.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+    <select id="queryNum" resultType="java.lang.Integer">
+        SELECT count(*) FROM award_record where  DATE_FORMAT(create_time,'%Y-%m-%d') =#{date}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.AwardRecord">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="awardName != null and awardName != ''">
+                 `award_name`=#{awardName},
+            </if>
+            <if test="type != null">
+                 `type`=#{type},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="userTo != null and userTo != ''">
+                 `user_to`=#{userTo},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

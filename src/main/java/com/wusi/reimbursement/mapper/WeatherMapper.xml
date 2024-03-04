@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.WeatherMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.Weather">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="cid" property="cid" jdbcType="VARCHAR"/>
+            <result column="location" property="location" jdbcType="VARCHAR"/>
+            <result column="parent_city" property="parentCity" jdbcType="VARCHAR"/>
+            <result column="province" property="province" jdbcType="VARCHAR"/>
+            <result column="country" property="country" jdbcType="VARCHAR"/>
+            <result column="lat" property="lat" jdbcType="VARCHAR"/>
+            <result column="lon" property="lon" jdbcType="VARCHAR"/>
+            <result column="time_zone" property="timeZone" jdbcType="VARCHAR"/>
+            <result column="loc" property="loc" jdbcType="VARCHAR"/>
+            <result column="utc" property="utc" jdbcType="VARCHAR"/>
+            <result column="cond_txt_day" property="condTxtDay" jdbcType="VARCHAR"/>
+            <result column="cond_txt_night" property="condTxtNight" jdbcType="VARCHAR"/>
+            <result column="date" property="date" jdbcType="TIMESTAMP"/>
+            <result column="hum" property="hum" jdbcType="VARCHAR"/>
+            <result column="moon_rise" property="moonRise" jdbcType="VARCHAR"/>
+            <result column="moon_set" property="moonSet" jdbcType="VARCHAR"/>
+            <result column="pres" property="pres" jdbcType="INTEGER"/>
+            <result column="sun_rise" property="sunRise" jdbcType="VARCHAR"/>
+            <result column="sun_set" property="sunSet" jdbcType="VARCHAR"/>
+            <result column="tmp_max" property="tmpMax" jdbcType="VARCHAR"/>
+            <result column="tmp_min" property="tmpMin" jdbcType="VARCHAR"/>
+            <result column="wind_dir" property="windDir" jdbcType="VARCHAR"/>
+            <result column="wind_sc" property="windSc" jdbcType="VARCHAR"/>
+            <result column="wind_spd" property="windSpd" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">weather</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `cid`,
+            `location`,
+            `parent_city`,
+            `province`,
+            `country`,
+            `lat`,
+            `lon`,
+            `time_zone`,
+            `loc`,
+            `utc`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `date`,
+            `hum`,
+            `moon_rise`,
+            `moon_set`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_sc`,
+            `wind_spd`,
+            `create_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="cid != null and cid != ''">
+                        AND `cid`=#{cid}
+                    </if>
+                    <if test="location != null and location != ''">
+                        AND `location`=#{location}
+                    </if>
+                    <if test="parentCity != null and parentCity != ''">
+                        AND `parent_city`=#{parentCity}
+                    </if>
+                    <if test="province != null and province != ''">
+                        AND `province`=#{province}
+                    </if>
+                    <if test="country != null and country != ''">
+                        AND `country`=#{country}
+                    </if>
+                    <if test="lat != null and lat != ''">
+                        AND `lat`=#{lat}
+                    </if>
+                    <if test="lon != null and lon != ''">
+                        AND `lon`=#{lon}
+                    </if>
+                    <if test="timeZone != null and timeZone != ''">
+                        AND `time_zone`=#{timeZone}
+                    </if>
+                    <if test="loc != null and loc != ''">
+                        AND `loc`=#{loc}
+                    </if>
+                    <if test="utc != null and utc != ''">
+                        AND `utc`=#{utc}
+                    </if>
+                    <if test="condTxtDay != null and condTxtDay != ''">
+                        AND `cond_txt_day`=#{condTxtDay}
+                    </if>
+                    <if test="condTxtNight != null and condTxtNight != ''">
+                        AND `cond_txt_night`=#{condTxtNight}
+                    </if>
+                    <if test="date != null">
+                        AND `date`=#{date}
+                    </if>
+                    <if test="hum != null and hum != ''">
+                        AND `hum`=#{hum}
+                    </if>
+                    <if test="moonRise != null and moonRise != ''">
+                        AND `moon_rise`=#{moonRise}
+                    </if>
+                    <if test="moonSet != null and moonSet != ''">
+                        AND `moon_set`=#{moonSet}
+                    </if>
+                    <if test="pres != null">
+                        AND `pres`=#{pres}
+                    </if>
+                    <if test="sunRise != null and sunRise != ''">
+                        AND `sun_rise`=#{sunRise}
+                    </if>
+                    <if test="sunSet != null and sunSet != ''">
+                        AND `sun_set`=#{sunSet}
+                    </if>
+                    <if test="tmpMax != null and tmpMax != ''">
+                        AND `tmp_max`=#{tmpMax}
+                    </if>
+                    <if test="tmpMin != null and tmpMin != ''">
+                        AND `tmp_min`=#{tmpMin}
+                    </if>
+                    <if test="windDir != null and windDir != ''">
+                        AND `wind_dir`=#{windDir}
+                    </if>
+                    <if test="windSc != null and windSc != ''">
+                        AND `wind_sc`=#{windSc}
+                    </if>
+                    <if test="windSpd != null and windSpd != ''">
+                        AND `wind_spd`=#{windSpd}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <select id="queryByDate" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE DATE_FORMAT(create_time,'%Y-%m-%d') = #{date} limit 1;
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.Weather" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `cid`,
+            `location`,
+            `parent_city`,
+            `province`,
+            `country`,
+            `lat`,
+            `lon`,
+            `time_zone`,
+            `loc`,
+            `utc`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `date`,
+            `hum`,
+            `moon_rise`,
+            `moon_set`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_sc`,
+            `wind_spd`,
+            `create_time`
+        )
+        VALUES(
+            #{id},
+            #{cid},
+            #{location},
+            #{parentCity},
+            #{province},
+            #{country},
+            #{lat},
+            #{lon},
+            #{timeZone},
+            #{loc},
+            #{utc},
+            #{condTxtDay},
+            #{condTxtNight},
+            #{date},
+            #{hum},
+            #{moonRise},
+            #{moonSet},
+            #{pres},
+            #{sunRise},
+            #{sunSet},
+            #{tmpMax},
+            #{tmpMin},
+            #{windDir},
+            #{windSc},
+            #{windSpd},
+            #{createTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `cid`,
+            `location`,
+            `parent_city`,
+            `province`,
+            `country`,
+            `lat`,
+            `lon`,
+            `time_zone`,
+            `loc`,
+            `utc`,
+            `cond_txt_day`,
+            `cond_txt_night`,
+            `date`,
+            `hum`,
+            `moon_rise`,
+            `moon_set`,
+            `pres`,
+            `sun_rise`,
+            `sun_set`,
+            `tmp_max`,
+            `tmp_min`,
+            `wind_dir`,
+            `wind_sc`,
+            `wind_spd`,
+            `create_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.cid},
+            #{cm.location},
+            #{cm.parentCity},
+            #{cm.province},
+            #{cm.country},
+            #{cm.lat},
+            #{cm.lon},
+            #{cm.timeZone},
+            #{cm.loc},
+            #{cm.utc},
+            #{cm.condTxtDay},
+            #{cm.condTxtNight},
+            #{cm.date},
+            #{cm.hum},
+            #{cm.moonRise},
+            #{cm.moonSet},
+            #{cm.pres},
+            #{cm.sunRise},
+            #{cm.sunSet},
+            #{cm.tmpMax},
+            #{cm.tmpMin},
+            #{cm.windDir},
+            #{cm.windSc},
+            #{cm.windSpd},
+            #{cm.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.Weather">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="cid != null and cid != ''">
+                 `cid`=#{cid},
+            </if>
+            <if test="location != null and location != ''">
+                 `location`=#{location},
+            </if>
+            <if test="parentCity != null and parentCity != ''">
+                 `parent_city`=#{parentCity},
+            </if>
+            <if test="province != null and province != ''">
+                 `province`=#{province},
+            </if>
+            <if test="country != null and country != ''">
+                 `country`=#{country},
+            </if>
+            <if test="lat != null and lat != ''">
+                 `lat`=#{lat},
+            </if>
+            <if test="lon != null and lon != ''">
+                 `lon`=#{lon},
+            </if>
+            <if test="timeZone != null and timeZone != ''">
+                 `time_zone`=#{timeZone},
+            </if>
+            <if test="loc != null and loc != ''">
+                 `loc`=#{loc},
+            </if>
+            <if test="utc != null and utc != ''">
+                 `utc`=#{utc},
+            </if>
+            <if test="condTxtDay != null and condTxtDay != ''">
+                 `cond_txt_day`=#{condTxtDay},
+            </if>
+            <if test="condTxtNight != null and condTxtNight != ''">
+                 `cond_txt_night`=#{condTxtNight},
+            </if>
+            <if test="date != null">
+                 `date`=#{date},
+            </if>
+            <if test="hum != null and hum != ''">
+                 `hum`=#{hum},
+            </if>
+            <if test="moonRise != null and moonRise != ''">
+                 `moon_rise`=#{moonRise},
+            </if>
+            <if test="moonSet != null and moonSet != ''">
+                 `moon_set`=#{moonSet},
+            </if>
+            <if test="pres != null">
+                 `pres`=#{pres},
+            </if>
+            <if test="sunRise != null and sunRise != ''">
+                 `sun_rise`=#{sunRise},
+            </if>
+            <if test="sunSet != null and sunSet != ''">
+                 `sun_set`=#{sunSet},
+            </if>
+            <if test="tmpMax != null and tmpMax != ''">
+                 `tmp_max`=#{tmpMax},
+            </if>
+            <if test="tmpMin != null and tmpMin != ''">
+                 `tmp_min`=#{tmpMin},
+            </if>
+            <if test="windDir != null and windDir != ''">
+                 `wind_dir`=#{windDir},
+            </if>
+            <if test="windSc != null and windSc != ''">
+                 `wind_sc`=#{windSc},
+            </if>
+            <if test="windSpd != null and windSpd != ''">
+                 `wind_spd`=#{windSpd},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

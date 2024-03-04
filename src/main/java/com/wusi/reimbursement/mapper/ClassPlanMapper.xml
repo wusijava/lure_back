@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.ClassPlanMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.ClassPlan">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="date" property="date" jdbcType="VARCHAR"/>
+            <result column="name" property="name" jdbcType="VARCHAR"/>
+            <result column="classes" property="classes" jdbcType="VARCHAR"/>
+            <result column="cteate_time" property="cteateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">class_plan</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `date`,
+            `name`,
+            `classes`,
+            `cteate_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="date != null and date != ''">
+                        AND `date`=#{date}
+                    </if>
+                    <if test="name != null and name != ''">
+                        AND `name`=#{name}
+                    </if>
+                    <if test="classes != null and classes != ''">
+                        AND `classes`=#{classes}
+                    </if>
+                    <if test="cteateTime != null">
+                        AND `cteate_time`=#{cteateTime}
+                    </if>
+                    <if test="dateRange != null">
+                        AND `date` in #{dateRange}
+                    </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.ClassPlan" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `date`,
+            `name`,
+            `classes`,
+            `cteate_time`
+        )
+        VALUES(
+            #{id},
+            #{date},
+            #{name},
+            #{classes},
+            #{cteateTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `date`,
+            `name`,
+            `classes`,
+            `cteate_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.date},
+            #{cm.name},
+            #{cm.classes},
+            #{cm.cteateTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.ClassPlan">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="date != null and date != ''">
+                 `date`=#{date},
+            </if>
+            <if test="name != null and name != ''">
+                 `name`=#{name},
+            </if>
+            <if test="classes != null and classes != ''">
+                 `classes`=#{classes},
+            </if>
+            <if test="cteateTime != null">
+                 `cteate_time`=#{cteateTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <select id="querycount" resultType="java.lang.Long">
+        select COUNT(*) FROM (select date from class_plan
+        <where>
+            <if test="dateList != null and dateList.size>0">
+                `date`in
+                <foreach collection="dateList" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY date) a
+    </select>
+    <select id="queryLast" resultType="com.wusi.reimbursement.entity.ClassPlan">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        order by id desc limit 1
+    </select>
+
+    <select id="queryListByParam" resultType="com.wusi.reimbursement.entity.ClassPlan">
+        SELECT DISTINCT date FROM `class_plan`
+        <where>
+            <if test="dateList != null and dateList.size>0">
+                `date`in
+                <foreach collection="dateList" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY date desc limit #{page},#{limit}
+    </select>
+</mapper>

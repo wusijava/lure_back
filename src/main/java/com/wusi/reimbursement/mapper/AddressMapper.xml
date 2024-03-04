@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.AddressMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.Address">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="province" property="province" jdbcType="VARCHAR"/>
+            <result column="city" property="city" jdbcType="VARCHAR"/>
+            <result column="district" property="district" jdbcType="VARCHAR"/>
+            <result column="lng" property="lng" jdbcType="VARCHAR"/>
+            <result column="lat" property="lat" jdbcType="VARCHAR"/>
+            <result column="address" property="address" jdbcType="VARCHAR"/>
+            <result column="name" property="name" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">address</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `name`,
+            `create_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="province != null and province != ''">
+                        AND `province`=#{province}
+                    </if>
+                    <if test="city != null and city != ''">
+                        AND `city`=#{city}
+                    </if>
+                    <if test="district != null and district != ''">
+                        AND `district`=#{district}
+                    </if>
+                    <if test="lng != null and lng != ''">
+                        AND `lng`=#{lng}
+                    </if>
+                    <if test="lat != null and lat != ''">
+                        AND `lat`=#{lat}
+                    </if>
+                    <if test="address != null and address != ''">
+                        AND `address`=#{address}
+                    </if>
+                    <if test="name != null and name != ''">
+                        AND `name`=#{name}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.Address" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `name`,
+            `create_time`
+        )
+        VALUES(
+            #{id},
+            #{province},
+            #{city},
+            #{district},
+            #{lng},
+            #{lat},
+            #{address},
+            #{name},
+            #{createTime}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `province`,
+            `city`,
+            `district`,
+            `lng`,
+            `lat`,
+            `address`,
+            `name`,
+            `create_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.province},
+            #{cm.city},
+            #{cm.district},
+            #{cm.lng},
+            #{cm.lat},
+            #{cm.address},
+            #{cm.name},
+            #{cm.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.Address">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="province != null and province != ''">
+                 `province`=#{province},
+            </if>
+            <if test="city != null and city != ''">
+                 `city`=#{city},
+            </if>
+            <if test="district != null and district != ''">
+                 `district`=#{district},
+            </if>
+            <if test="lng != null and lng != ''">
+                 `lng`=#{lng},
+            </if>
+            <if test="lat != null and lat != ''">
+                 `lat`=#{lat},
+            </if>
+            <if test="address != null and address != ''">
+                 `address`=#{address},
+            </if>
+            <if test="name != null and name != ''">
+                 `name`=#{name},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

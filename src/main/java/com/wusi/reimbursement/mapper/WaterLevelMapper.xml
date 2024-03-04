@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.WaterLevelMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.WaterLevel">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="water_level" property="waterLevel" jdbcType="VARCHAR"/>
+            <result column="address" property="address" jdbcType="VARCHAR"/>
+            <result column="href" property="href" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="table">water_level</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `water_level`,
+            `address`,
+            `href`,
+            `create_time`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="waterLevel != null and waterLevel != ''">
+                        AND `water_level`=#{waterLevel}
+                    </if>
+                    <if test="address != null and address != ''">
+                        AND `address`=#{address}
+                    </if>
+                    <if test="href != null and href != ''">
+                        AND `href`=#{href}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                <if test="startTime != null">
+                    and DATE_FORMAT(create_time,'%Y-%m-%d') >= #{startTime}
+                </if>
+                <if test="endTime != null">
+                    and DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
+                </if>
+            </trim>
+        </where>
+        order by create_time desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <select id="queryByTime" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        where  DATE_FORMAT(create_time,'%Y-%m-%d') = #{createTime} limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.WaterLevel" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `water_level`,
+            `address`,
+            `create_time`,
+            `href`
+        )
+        VALUES(
+            #{id},
+            #{waterLevel},
+            #{address},
+            #{createTime},
+            #{href}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `water_level`,
+            `address`,
+            `create_time`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.waterLevel},
+            #{cm.address},
+            #{cm.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.WaterLevel">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="waterLevel != null and waterLevel != ''">
+                 `water_level`=#{waterLevel},
+            </if>
+            <if test="address != null and address != ''">
+                 `address`=#{address},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

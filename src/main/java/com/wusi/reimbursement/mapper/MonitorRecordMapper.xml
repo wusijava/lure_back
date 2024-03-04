@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.MonitorRecordMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.MonitorRecord">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="total" property="total" jdbcType="VARCHAR"/>
+            <result column="amy_offline_num" property="amyOfflineNum" jdbcType="VARCHAR"/>
+            <result column="amy_on_num" property="amyOnNum" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="is_do" property="isDo" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">monitor_record</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `total`,
+            `amy_offline_num`,
+            `amy_on_num`,
+            `create_time`,
+            `is_do`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="total != null and total != ''">
+                        AND `total`=#{total}
+                    </if>
+                    <if test="amyOfflineNum != null and amyOfflineNum != ''">
+                        AND `amy_offline_num`=#{amyOfflineNum}
+                    </if>
+                    <if test="amyOnNum != null and amyOnNum != ''">
+                        AND `amy_on_num`=#{amyOnNum}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="isDo != null and isDo != ''">
+                        AND `is_do`=#{isDo}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.MonitorRecord" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `total`,
+            `amy_offline_num`,
+            `amy_on_num`,
+            `create_time`,
+            `is_do`
+        )
+        VALUES(
+            #{id},
+            #{total},
+            #{amyOfflineNum},
+            #{amyOnNum},
+            #{createTime},
+            #{isDo}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `total`,
+            `amy_offline_num`,
+            `amy_on_num`,
+            `create_time`,
+            `is_do`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.total},
+            #{cm.amyOfflineNum},
+            #{cm.amyOnNum},
+            #{cm.createTime},
+            #{cm.isDo}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.MonitorRecord">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="total != null and total != ''">
+                 `total`=#{total},
+            </if>
+            <if test="amyOfflineNum != null and amyOfflineNum != ''">
+                 `amy_offline_num`=#{amyOfflineNum},
+            </if>
+            <if test="amyOnNum != null and amyOnNum != ''">
+                 `amy_on_num`=#{amyOnNum},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="isDo != null and isDo != ''">
+                 `is_do`=#{isDo},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.LureShoppingMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.LureShopping">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="item" property="item" jdbcType="VARCHAR"/>
+            <result column="price" property="price" jdbcType="VARCHAR"/>
+            <result column="date" property="date" jdbcType="TIMESTAMP"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+            <result column="url" property="url" jdbcType="VARCHAR"/>
+            <result column="uid" property="uid" jdbcType="VARCHAR"/>
+            <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+            <result column="recommend" property="recommend" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="table">lure_shopping</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `item`,
+            `price`,
+            `date`,
+            `remark`,
+            `url`,
+            `uid`,
+            `user_name`,
+            `recommend`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="item != null and item != ''">
+                        AND `item` like "%"#{item}"%"
+                    </if>
+                    <if test="price != null and price != ''">
+                        AND `price`=#{price}
+                    </if>
+                    <if test="date != null">
+                        AND `date`=#{date}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+                    <if test="url != null and url != ''">
+                        AND `url`=#{url}
+                    </if>
+                    <if test="uid != null and uid != ''">
+                        AND `uid`=#{uid}
+                    </if>
+                    <if test="userName != null and userName != ''">
+                        AND `user_name`=#{userName}
+                    </if>
+                    <if test="recommend != null">
+                        AND `recommend`=#{recommend}
+                    </if>
+            </trim>
+        </where>
+        order by date desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.LureShopping" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `item`,
+            `price`,
+            `date`,
+            `remark`,
+            `url`,
+            `uid`,
+            `user_name`,
+            `recommend`
+        )
+        VALUES(
+            #{id},
+            #{item},
+            #{price},
+            #{date},
+            #{remark},
+            #{url},
+            #{uid},
+            #{userName},
+            #{recommend}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `item`,
+            `price`,
+            `date`,
+            `remark`,
+            `url`,
+            `uid`,
+            `user_name`,
+            `recommend`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.item},
+            #{cm.price},
+            #{cm.date},
+            #{cm.remark},
+            #{cm.url},
+            #{cm.uid},
+            #{cm.userName},
+            #{cm.recommend}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureShopping">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="item != null and item != ''">
+                 `item`=#{item},
+            </if>
+            <if test="price != null and price != ''">
+                 `price`=#{price},
+            </if>
+            <if test="date != null">
+                 `date`=#{date},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+            <if test="url != null and url != ''">
+                 `url`=#{url},
+            </if>
+            <if test="uid != null and uid != ''">
+                 `uid`=#{uid},
+            </if>
+            <if test="userName != null and userName != ''">
+                 `user_name`=#{userName},
+            </if>
+            <if test="recommend != null">
+                 `recommend`=#{recommend},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+    <delete id="deleteById">
+        delete from
+        <include refid="table"/>
+        WHERE
+        id=#{id}
+    </delete>
+</mapper>

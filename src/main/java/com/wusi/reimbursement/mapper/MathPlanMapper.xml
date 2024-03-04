@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.MathPlanMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.MathPlan">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="task" property="task" jdbcType="VARCHAR"/>
+            <result column="yi_do" property="yiDo" jdbcType="VARCHAR"/>
+            <result column="wei_do" property="weiDo" jdbcType="VARCHAR"/>
+            <result column="time" property="time" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="right" property="right" jdbcType="VARCHAR"/>
+            <result column="error" property="error" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">math_plan</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `task`,
+            `yi_do`,
+            `wei_do`,
+            `time`,
+            `create_time`,
+            `right`,
+            `error`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="task != null and task != ''">
+                        AND `task`=#{task}
+                    </if>
+                    <if test="yiDo != null and yiDo != ''">
+                        AND `yi_do`=#{yiDo}
+                    </if>
+                    <if test="weiDo != null and weiDo != ''">
+                        AND `wei_do`=#{weiDo}
+                    </if>
+                    <if test="time != null and time != ''">
+                        AND `time`=#{time}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="right != null and right != ''">
+                        AND `right`=#{right}
+                    </if>
+                    <if test="error != null and error != ''">
+                        AND `error`=#{error}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.MathPlan" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `task`,
+            `yi_do`,
+            `wei_do`,
+            `time`,
+            `create_time`,
+            `right`,
+            `error`
+        )
+        VALUES(
+            #{id},
+            #{task},
+            #{yiDo},
+            #{weiDo},
+            #{time},
+            #{createTime},
+            #{right},
+            #{error}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `task`,
+            `yi_do`,
+            `wei_do`,
+            `time`,
+            `create_time`,
+            `right`,
+            `error`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.task},
+            #{cm.yiDo},
+            #{cm.weiDo},
+            #{cm.time},
+            #{cm.createTime},
+            #{cm.right},
+            #{cm.error}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.MathPlan">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="task != null and task != ''">
+                 `task`=#{task},
+            </if>
+            <if test="yiDo != null and yiDo != ''">
+                 `yi_do`=#{yiDo},
+            </if>
+            <if test="weiDo != null and weiDo != ''">
+                 `wei_do`=#{weiDo},
+            </if>
+            <if test="time != null and time != ''">
+                 `time`=#{time},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="right != null and right != ''">
+                 `right`=#{right},
+            </if>
+            <if test="error != null and error != ''">
+                 `error`=#{error},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>
