@@ -222,9 +222,16 @@ public class LureController {
     @RequestMapping(value = "api/saveFish")
     @SysLog("保存中鱼或打龟数据")
     public Response<String> saveFish(SaveFish saveFish) throws Exception {
+        Date date=saveFish.getDate()==null?new Date():new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
+        if(DateUtil.isSameDay(date, new Date())){
+            date=new Date();
+        }
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         Weather weather = null;
         if (DataUtil.isNotEmpty(saveFish.getLng()) && DataUtil.isNotEmpty(saveFish.getLat())&&!"null".equals(saveFish.getLat())) {
+            if(date.getTime()<new SimpleDateFormat("yyyy-MM-dd").parse(new SimpleDateFormat("yyyy-MM-dd").format(new Date())).getTime()){
+                weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+            }
             weather = WeatherUtils.getWeather(saveFish.getLng() + "," + saveFish.getLat());
         }else{
             weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
@@ -256,7 +263,7 @@ public class LureController {
             data.setWindDir(weather.getWindDir());
             data.setWindDc(weather.getWindSc());
             data.setWindSpd(weather.getWindSpd());
-            data.setCreateTime(new Date());
+            data.setCreateTime(date);
         }
         data.setUid(loginUser.getUid());
         data.setUserName(loginUser.getNickName());
@@ -265,7 +272,7 @@ public class LureController {
             if(data.getGetFish() == 0){
                 LureFishGetQuery query = new LureFishGetQuery();
                 query.setUid(loginUser.getUid());
-                query.setTime(format2.format(new Date()));
+                query.setTime(format2.format(date));
                 query.setGetFish(0);
                 Long aLong = lureFishGetService.queryCount(query);
                 if (aLong > 0) {
@@ -281,7 +288,7 @@ public class LureController {
             if(data.getGetFish() == 1){
                 LureFishGetQuery query = new LureFishGetQuery();
                 query.setUid(loginUser.getUid());
-                query.setTime(format2.format(new Date()));
+                query.setTime(format2.format(date));
                 query.setGetFish(0);
                 LureFishGet fishGet = lureFishGetService.queryOne(query);
                 if (DataUtil.isNotEmpty(fishGet)) {
@@ -466,6 +473,16 @@ public class LureController {
     @SysLog("花费排行")
     public Response<List<SpendPai>> spendPai() {
         List<SpendPai> monthCount = lureFishGetService.spendPai();
+        return Response.ok(monthCount);
+    }
+
+
+    @RequestMapping(value = "/api/firstFish")
+    @ResponseBody
+    @SysLog("解锁鱼种")
+    public Response<List<FirstFish>> firstFish() {
+        RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
+        List<FirstFish> monthCount = lureFishGetService.firstFish(loginUser.getUid());
         return Response.ok(monthCount);
     }
 }

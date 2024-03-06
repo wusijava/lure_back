@@ -20,4 +20,5 @@ public class SaveFish {
     private Integer getFish;
     private Integer eatFish;
     private Integer num;
+    private String date;
 }

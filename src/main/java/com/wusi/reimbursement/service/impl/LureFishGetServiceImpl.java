@@ -385,4 +385,26 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
         }
         return list;
     }
+
+    @Override
+    public List<FirstFish> firstFish(String uid) {
+        List<FirstFish> list=new ArrayList<>();
+        LureFishGet query = new LureFishGetQuery();
+        query.setUid(uid);
+        query.setGetFish(1);
+        List<LureFishGet> lureFishGets = lureFishGetService.queryList(query);
+        List<String> fishKind = lureFishGets.stream().map(w -> w.getFishKind()).distinct().collect(Collectors.toList());
+        for (String name : fishKind) {
+            FirstFish firstFish=new FirstFish();
+            List<LureFishGet> fishList = lureFishGets.stream().filter(w -> w.getFishKind().equals(name)).collect(Collectors.toList());
+            LureFishGet fishGet = fishList.get(fishList.size() - 1);
+            firstFish.setAddress(fishGet.getAddress());
+            firstFish.setFish(name);
+            firstFish.setTime(new SimpleDateFormat("yyyy-MM-dd").format(fishGet.getCreateTime()));
+            firstFish.setAddress(fishGet.getAddress());
+            firstFish.setWeather(fishGet.getTmpMin()+"℃-"+fishGet.getTmpMax()+"℃");
+            list.add(firstFish);
+        }
+        return list;
+    }
 }

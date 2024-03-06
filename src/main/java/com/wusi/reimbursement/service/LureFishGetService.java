@@ -35,4 +35,6 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     List<LureFishGet> queryByMonth(String type,String format);
 
     List<SpendPai> spendPai();
+
+    List<FirstFish> firstFish(String uid);
 }
