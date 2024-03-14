@@ -221,6 +221,7 @@ public class LureController {
 
     @RequestMapping(value = "api/saveFish")
     @SysLog("保存中鱼或打龟数据")
+    @RateLimit(permitsPerSecond = 0.2, ipLimit = true, description = "限制频率")
     public Response<String> saveFish(SaveFish saveFish) throws Exception {
         Date date=saveFish.getDate()==null?new Date():new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
         if(DateUtil.isSameDay(date, new Date())){
@@ -230,11 +231,12 @@ public class LureController {
         Weather weather = null;
         if (DataUtil.isNotEmpty(saveFish.getLng()) && DataUtil.isNotEmpty(saveFish.getLat())&&!"null".equals(saveFish.getLat())) {
             if(date.getTime()<new SimpleDateFormat("yyyy-MM-dd").parse(new SimpleDateFormat("yyyy-MM-dd").format(new Date())).getTime()){
-                weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+            }else{
+                weather = WeatherUtils.getWeather(saveFish.getLng() + "," + saveFish.getLat());
             }
-            weather = WeatherUtils.getWeather(saveFish.getLng() + "," + saveFish.getLat());
         }else{
-            weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+            weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
         }
         LureFishGet data = new LureFishGet();
         data.setFishKind(saveFish.getFishKind());
@@ -263,8 +265,8 @@ public class LureController {
             data.setWindDir(weather.getWindDir());
             data.setWindDc(weather.getWindSc());
             data.setWindSpd(weather.getWindSpd());
-            data.setCreateTime(date);
         }
+        data.setCreateTime(date);
         data.setUid(loginUser.getUid());
         data.setUserName(loginUser.getNickName());
         try {
@@ -420,9 +422,9 @@ public class LureController {
     @ResponseBody
     @SysLog("查看鱼获共享")
     public Response<Page<FishShare>> fishShare(LureFishGetQuery query) throws Exception {
-        if (DataUtil.isEmpty(query.getPage()) || query.getPage() == 0) {
+       /* if (DataUtil.isEmpty(query.getPage()) || query.getPage() == 0) {
             DingDingTalkUtils.sendDingDingMsg(RequestContext.getCurrentUser().getNickName() + "查看共享鱼获！");
-        }
+        }*/
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
@@ -446,6 +448,7 @@ public class LureController {
         share.setSize(lure.getLength() + "厘米-" + lure.getWeight() + "斤");
         share.setUrl(lure.getImageUrl());
         share.setName(lure.getUserName());
+        share.setUse(lure.getUserName()+(lure.getUse()==2?"把鱼放流了！给他点赞！":"把鱼吃了!"));
         return share;
     }
 

@@ -173,7 +173,7 @@
         <include refid="Base_Column_List"/>
         FROM
         <include refid="table"/>
-        WHERE DATE_FORMAT(create_time,'%Y-%m-%d') = #{date} limit 1;
+        WHERE DATE_FORMAT(date,'%Y-%m-%d') = #{date} limit 1;
     </select>
 
     <insert id="insert" parameterType="com.wusi.reimbursement.entity.Weather" useGeneratedKeys="true"

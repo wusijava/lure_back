@@ -13,4 +13,6 @@ public class FishShare {
     private String size;
 
     private String url;
+
+    private String use;
 }

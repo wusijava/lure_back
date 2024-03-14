@@ -9,9 +9,9 @@ public class MainEntity {
     public static void main(String[] args) {
         String basePack = Main.class.getPackage().getName();
         CodeGenerator codeGenerator = new CodeGenerator();
-        codeGenerator.generateMybatisXml(basePack, OnlineStore.class);
-        codeGenerator.generateDao(basePack, OnlineStore.class);
-       codeGenerator.generateService(basePack, OnlineStore.class);
+        codeGenerator.generateMybatisXml(basePack, ShuiWenWaterLevel.class);
+        codeGenerator.generateDao(basePack, ShuiWenWaterLevel.class);
+       codeGenerator.generateService(basePack, ShuiWenWaterLevel.class);
        //codeGenerator.generateCreateSqlForPackage("com.click.jd.merchant.modules");
     }
 }

@@ -287,6 +287,17 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             List<LureFishGet> collect1 = lureFishGets.stream().filter(w -> w.getUserName().equals(name)).collect(Collectors.toList());
             paiHang.setName(name);
             paiHang.setNum(collect1.size());
+            List<MonthRate> rate = new ArrayList<>();
+            for (LureFishGet lureFishGet : collect1) {
+                MonthRate mr = new MonthRate();
+                mr.setGetFish(lureFishGet.getGetFish());
+                mr.setMonth(new SimpleDateFormat("yyyy-MM").format(lureFishGet.getCreateTime()));
+                mr.setDay(new SimpleDateFormat("yyyy-MM-dd").format(lureFishGet.getCreateTime()));
+                mr.setUse(lureFishGet.getUse());
+                mr.setFishKind(lureFishGet.getFishKind());
+                rate.add(mr);
+            }
+            paiHang.setDesc(getFishDesc(rate));
             data.add(paiHang);
         }
         data.sort(Comparator.comparing(PaiHang::getNum).reversed());
