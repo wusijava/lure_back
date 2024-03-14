@@ -11,6 +11,7 @@ import com.wusi.reimbursement.service.WaterLevelService;
 import com.wusi.reimbursement.utils.DataUtil;
 import com.wusi.reimbursement.utils.DateUtil;
 import com.wusi.reimbursement.utils.DingDingTalkUtils;
+import com.wusi.reimbursement.vo.ShuiWenWaterLevelJson;
 import com.wusi.reimbursement.vo.ShuiWenWaterLevelVo;
 import com.wusi.reimbursement.vo.WaterLevelVo;
 import lombok.extern.slf4j.Slf4j;
@@ -115,7 +116,7 @@ public class ShuiWenWaterLevelController {
         ShuiWenWaterLevelVo vo =new ShuiWenWaterLevelVo();
         vo.setCreateTime(sdf.format(waterLevel.getCreateTime()));
         vo.setId(waterLevel.getId());
-        vo.setList(JSON.parseArray(waterLevel.getData(), com.wusi.reimbursement.vo.ShuiWenWaterLevel.class));
+        vo.setList(JSON.parseArray(waterLevel.getData(), com.wusi.reimbursement.vo.ShuiWenWaterLevelJson.class));
         return vo;
     }
 

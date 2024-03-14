@@ -3,7 +3,7 @@ package com.wusi.reimbursement.vo;
 import lombok.Data;
 
 @Data
-public class ShuiWenWaterLevel {
+public class ShuiWenWaterLevelJson {
     private String  q;
     private String  rvnm;
     private String  stcd;
