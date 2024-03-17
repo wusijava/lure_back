@@ -31,9 +31,9 @@
                 <if test="endTime != null">
                     and DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
                 </if>
-
             </trim>
         </where>
+        order by create_time desc
         <if test="offset == null and limit != null">
             limit #{limit}
         </if>

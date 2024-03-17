@@ -57,7 +57,8 @@ spring:
 
 excelDownloadUrl: http://43.142.106.205:8083/downloadExcel/
 server:
-  port: 8083
+  port: 8085
+
 mybatis:
   mapper-locations: classpath:com/wusi/reimbursement/*Mapper.xml
   configuration:
@@ -69,11 +70,11 @@ upload:
     bucket: daningmeng001
     accessKey: dJR8UzN31Iy8-yzRlBR3TBrkOe1RUdMNp0yZM_9k
     secretKey: l1uLDn9umthxCvqCrKRsAYqriucp0uIJciDcV4Jz
-    host: http://www.picture.lureking.cn/
+    host: https://www.picture.lureking.cn/
 activemq: #MQ消息中间件
   broker-url: failover:(tcp://43.142.106.205:61616)
-  user: root
-  password: wusi20150402
+  user: admin
+  password: admin
   enabled: true
   max-connections: 50
   expiry-timeout: 10000

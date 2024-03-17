@@ -32,6 +32,7 @@
             <result column="uid" property="uid" jdbcType="VARCHAR"/>
             <result column="user_name" property="userName" jdbcType="VARCHAR"/>
             <result column="get_fish" property="getFish" jdbcType="INTEGER"/>
+            <result column="is_repeat" property="isRepeat" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="table">lure_fish_get</sql>
@@ -65,7 +66,8 @@
             `remark`,
             uid,
             user_name,
-            `get_fish`
+            `get_fish`,
+            is_repeat
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -154,6 +156,9 @@
                     <if test="getFish != null ">
                         AND `get_fish`=#{getFish}
                     </if>
+                    <if test="isRepeat != null ">
+                        AND `is_repeat`=#{isRepeat}
+                    </if>
                 <if test="uid != null and uid != ''">
                     AND `uid`=#{uid}
                 </if>
@@ -228,7 +233,8 @@
             `remark`,
             `get_fish`,
             uid,
-            user_name
+            user_name,
+            is_repeat
         )
         VALUES(
             #{id},
@@ -260,7 +266,8 @@
             #{remark},
             #{getFish},
             #{uid},
-            #{userName}
+            #{userName},
+            #{isRepeat}
         )
     </insert>
 
@@ -297,7 +304,8 @@
             `remark`,
             `get_fish`,
             uid,
-            user_name
+            user_name,
+            is_repeat
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
@@ -331,7 +339,8 @@
             #{cm.remark},
             #{cm.getFish},
             #{cm.uid},
-            #{cm.userName}
+            #{cm.userName},
+            #{cm.isRepeat}
             )
         </foreach>
     </insert>
@@ -483,6 +492,9 @@
             </if>
             <if test="remark != null">
                 `get_fish`=#{getFish},
+            </if>
+            <if test="isRepeat != null">
+                `is_repeat`=#{isRepeat},
             </if>
             <if test="uid != null and uid != ''">
                 `uid`=#{uid},

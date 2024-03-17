@@ -9,10 +9,12 @@ import com.wusi.reimbursement.config.SendMessage;
 import com.wusi.reimbursement.entity.*;
 import com.wusi.reimbursement.query.LureFishGetQuery;
 import com.wusi.reimbursement.query.LureShoppingQuery;
+import com.wusi.reimbursement.query.UserQuery;
 import com.wusi.reimbursement.service.*;
 import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -58,6 +60,8 @@ public class LureController {
     private WaterLevelService waterLevelService;
     @Autowired
     private WeatherService weatherService;
+    @Autowired
+    private UserService userService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -193,7 +197,7 @@ public class LureController {
     }
 
     @RequestMapping(value = "api/getFishList")
-    @SysLog("查看路亚鱼获")
+    @SysLog("获取鱼种")
     public Response<List<JSONObject>> getFishList() {
         List<LureFishKind> lureFishKinds = lureFishKindService.queryList(new LureFishKind());
         List<JSONObject> list = new ArrayList<>();
@@ -201,6 +205,20 @@ public class LureController {
             SelectionFish fish = new SelectionFish();
             fish.setId(i);
             fish.setName(lureFishKinds.get(i - 1).getName());
+            list.add(JSONObject.parseObject(JSONObject.toJSONString(fish)));
+        }
+        return Response.ok(list);
+    }
+
+    @RequestMapping(value = "api/userList")
+    @SysLog("获取用户列表")
+    public Response<List<JSONObject>> userList() {
+        List<User> lureFishKinds = userService.queryList(new UserQuery());
+        List<JSONObject> list = new ArrayList<>();
+        for (int i = 1; i <= lureFishKinds.size(); i++) {
+            SelectionFish fish = new SelectionFish();
+            fish.setId(i);
+            fish.setName(lureFishKinds.get(i - 1).getNickName());
             list.add(JSONObject.parseObject(JSONObject.toJSONString(fish)));
         }
         return Response.ok(list);
@@ -252,6 +270,7 @@ public class LureController {
         data.setImageUrl(saveFish.getUrl());
         data.setRemark(saveFish.getRemark());
         data.setUse(saveFish.getEatFish());
+        data.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
         data.setGetFish((DataUtil.isNotEmpty(saveFish.getGetFish()) && saveFish.getGetFish() == 0) ? 0 : 1);
         if (DataUtil.isNotEmpty(weather)) {
             data.setCondTxtDay(weather.getCondTxtDay());
@@ -301,8 +320,12 @@ public class LureController {
                 lureFishGetService.insert(data);
             }else{
                 List<LureFishGet> getList=new ArrayList<>();
-                for (int i=0;i<saveFish.getNum();i++){
-                    getList.add(data);
+                getList.add(data);
+                LureFishGet newFish=new LureFishGet();
+                BeanUtils.copyProperties(data, newFish);
+                for (int i=0;i<saveFish.getNum()-1;i++){
+                    newFish.setIsRepeat(LureFishGet.IsRepeat.yes.getCode());
+                    getList.add(newFish);
                 }
                 lureFishGetService.insertBatch(getList);
             }
@@ -341,12 +364,11 @@ public class LureController {
         vo.setLure(lure.getLure());
         vo.setTmp(lure.getTmpMin() + "℃-" + lure.getTmpMax() + "℃");
         vo.setId(lure.getId());
-        vo.setImageUrl(lure.getImageUrl());
+        vo.setImageUrl(DataUtil.isEmpty(lure.getImageUrl())?"http://www.picture.lureking.cn/temp/1/v4zz82.jpg":lure.getImageUrl());
         vo.setPres(lure.getPres() + "hPa");
         vo.setCond(lure.getCondTxtDay() + "-" + lure.getCondTxtNight());
         vo.setCreateTime(sdf.format(lure.getCreateTime()));
-        vo.setRemark(lure.getRemark());
-        //vo.setAddress(lure.getAddress());
+        vo.setRemark(DataUtil.isEmpty(lure.getRemark())?"无备注":lure.getRemark());
         vo.setAddress(DataUtil.isEmpty(lure.getAddress())?"大师不愿意透露地址":lure.getAddress());
         vo.setLength(lure.getLength() + "cm");
         String str = sdf2.format(lure.getCreateTime());
@@ -430,6 +452,7 @@ public class LureController {
         }
         query.setLimit(1);
         query.setNotUid((RequestContext.getCurrentUser().getUid()));
+        query.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
         query.setPage(query.getLimit() * (query.getPage()));
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
