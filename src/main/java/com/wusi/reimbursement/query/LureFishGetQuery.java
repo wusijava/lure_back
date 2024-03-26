@@ -22,4 +22,6 @@ public class LureFishGetQuery extends LureFishGet {
     private String notUid;
 
     private String time;
+
+    private String type;
 }

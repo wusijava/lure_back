@@ -13,4 +13,6 @@ public interface ShuiWenWaterLevelMapper extends BaseMapper<ShuiWenWaterLevel,Lo
 
 
     ShuiWenWaterLevel queryByDate(String format);
+
+    ShuiWenWaterLevel queryLastOne();
 }

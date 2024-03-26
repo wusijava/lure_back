@@ -10,4 +10,6 @@ import com.wusi.reimbursement.entity.ShuiWenWaterLevel;
 public interface ShuiWenWaterLevelService extends BaseService<ShuiWenWaterLevel,Long> {
 
     ShuiWenWaterLevel queryByDate(String format);
+
+    ShuiWenWaterLevel queryLastOne();
 }

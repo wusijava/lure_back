@@ -33,4 +33,9 @@ public class WeatherServiceImpl extends BaseMybatisServiceImpl<Weather,Long> imp
         }
         return weatherMapper.queryByDate(date);
     }
+
+    @Override
+    public Weather queryLastOne() {
+        return weatherMapper.queryLastOne();
+    }
 }

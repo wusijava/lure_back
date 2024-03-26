@@ -13,4 +13,11 @@ public class ShuiWenWaterLevel implements Identifiable<Long> {
     private String data;
 
     private Date createTime;
+
+    /**
+     * -1退 1涨 0持平
+     */
+    private Integer downOrUp;
+
+    private String value;
 }

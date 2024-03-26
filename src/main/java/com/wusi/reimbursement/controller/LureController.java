@@ -13,6 +13,8 @@ import com.wusi.reimbursement.query.UserQuery;
 import com.wusi.reimbursement.service.*;
 import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.alibaba.fastjson.JSONObject.*;
 
 /**
  * @ Description   :  Lure Controller
@@ -41,6 +46,7 @@ import java.util.Map;
  */
 @RestController
 @Slf4j
+@Api(tags = "路了个鸭")
 public class LureController {
     @Autowired
     private LureShoppingService lureShoppingService;
@@ -62,6 +68,8 @@ public class LureController {
     private WeatherService weatherService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ShuiWenWaterLevelService shuiWenWaterLevelService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -74,7 +82,7 @@ public class LureController {
         }
         LureShopping shopping = getSpend(spendList, loginUser);
         lureShoppingService.insert(shopping);
-        SendMessage.sendMessage(JmsMessaging.IMG_BACK_MESSAGE, JSONObject.toJSONString(shopping));
+        SendMessage.sendMessage(JmsMessaging.IMG_BACK_MESSAGE, toJSONString(shopping));
         return Response.ok("路亚毁一生!");
     }
 
@@ -131,7 +139,7 @@ public class LureController {
             query.setPage(0);
         }
         query.setLimit(1);
-        if(query.getRecommend()!=null&&query.getRecommend()==0){
+        if (query.getRecommend() != null && query.getRecommend() == 0) {
             query.setUid(RequestContext.getCurrentUser().getUid());
             query.setRecommend(null);
         }
@@ -183,6 +191,7 @@ public class LureController {
         }
         return Response.fail("删除失败!!!");
     }
+
     @RequestMapping(value = "api/lureMonthSpend")
     public Response<String> monthSpend() {
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
@@ -205,7 +214,7 @@ public class LureController {
             SelectionFish fish = new SelectionFish();
             fish.setId(i);
             fish.setName(lureFishKinds.get(i - 1).getName());
-            list.add(JSONObject.parseObject(JSONObject.toJSONString(fish)));
+            list.add(parseObject(toJSONString(fish)));
         }
         return Response.ok(list);
     }
@@ -219,7 +228,7 @@ public class LureController {
             SelectionFish fish = new SelectionFish();
             fish.setId(i);
             fish.setName(lureFishKinds.get(i - 1).getNickName());
-            list.add(JSONObject.parseObject(JSONObject.toJSONString(fish)));
+            list.add(parseObject(toJSONString(fish)));
         }
         return Response.ok(list);
     }
@@ -232,7 +241,7 @@ public class LureController {
             SelectionFish fish = new SelectionFish();
             fish.setId(i);
             fish.setName(lureList.get(i - 1).getLure());
-            list.add(JSONObject.parseObject(JSONObject.toJSONString(fish)));
+            list.add(parseObject(toJSONString(fish)));
         }
         return Response.ok(list);
     }
@@ -241,20 +250,20 @@ public class LureController {
     @SysLog("保存中鱼或打龟数据")
     @RateLimit(permitsPerSecond = 0.2, ipLimit = true, description = "限制频率")
     public Response<String> saveFish(SaveFish saveFish) throws Exception {
-        Date date=saveFish.getDate()==null?new Date():new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
-        if(DateUtil.isSameDay(date, new Date())){
-            date=new Date();
+        Date date = saveFish.getDate() == null ? new Date() : new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
+        if (DateUtil.isSameDay(date, new Date())) {
+            date = new Date();
         }
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         Weather weather = null;
-        if (DataUtil.isNotEmpty(saveFish.getLng()) && DataUtil.isNotEmpty(saveFish.getLat())&&!"null".equals(saveFish.getLat())) {
-            if(date.getTime()<new SimpleDateFormat("yyyy-MM-dd").parse(new SimpleDateFormat("yyyy-MM-dd").format(new Date())).getTime()){
-                weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
-            }else{
+        if (DataUtil.isNotEmpty(saveFish.getLng()) && DataUtil.isNotEmpty(saveFish.getLat()) && !"null".equals(saveFish.getLat())) {
+            if (date.getTime() < new SimpleDateFormat("yyyy-MM-dd").parse(new SimpleDateFormat("yyyy-MM-dd").format(new Date())).getTime()) {
+                weather = weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+            } else {
                 weather = WeatherUtils.getWeather(saveFish.getLng() + "," + saveFish.getLat());
             }
-        }else{
-            weather=weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+        } else {
+            weather = weatherService.queryByDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
         }
         LureFishGet data = new LureFishGet();
         data.setFishKind(saveFish.getFishKind());
@@ -290,7 +299,7 @@ public class LureController {
         data.setUserName(loginUser.getNickName());
         try {
             //同一人一天不能增加两个打龟记录
-            if(data.getGetFish() == 0){
+            if (data.getGetFish() == 0) {
                 LureFishGetQuery query = new LureFishGetQuery();
                 query.setUid(loginUser.getUid());
                 query.setTime(format2.format(date));
@@ -306,7 +315,7 @@ public class LureController {
                 }
             }
             //处理先增加打龟记录再增加鱼获
-            if(data.getGetFish() == 1){
+            if (data.getGetFish() == 1) {
                 LureFishGetQuery query = new LureFishGetQuery();
                 query.setUid(loginUser.getUid());
                 query.setTime(format2.format(date));
@@ -316,14 +325,14 @@ public class LureController {
                     lureFishGetService.deleteById(fishGet.getId());
                 }
             }
-            if((DataUtil.isNotEmpty(saveFish.getNum())&&saveFish.getNum()==1)||(DataUtil.isNotEmpty(saveFish.getGetFish())&&saveFish.getGetFish()==0)){
+            if ((DataUtil.isNotEmpty(saveFish.getNum()) && saveFish.getNum() == 1) || (DataUtil.isNotEmpty(saveFish.getGetFish()) && saveFish.getGetFish() == 0)) {
                 lureFishGetService.insert(data);
-            }else{
-                List<LureFishGet> getList=new ArrayList<>();
+            } else {
+                List<LureFishGet> getList = new ArrayList<>();
                 getList.add(data);
-                LureFishGet newFish=new LureFishGet();
+                LureFishGet newFish = new LureFishGet();
                 BeanUtils.copyProperties(data, newFish);
-                for (int i=0;i<saveFish.getNum()-1;i++){
+                for (int i = 0; i < saveFish.getNum() - 1; i++) {
                     newFish.setIsRepeat(LureFishGet.IsRepeat.yes.getCode());
                     getList.add(newFish);
                 }
@@ -351,35 +360,35 @@ public class LureController {
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
         List<LureFishGetVo> voList = new ArrayList<>();
         for (LureFishGet lure : page.getContent()) {
-            voList.add(getLureFishList(lure,RequestContext.getCurrentUser().getUid()));
+            voList.add(getLureFishList(lure, RequestContext.getCurrentUser().getUid()));
         }
         Page<LureFishGetVo> voPage = new PageImpl<>(voList, pageable, page.getTotalElements());
         return Response.ok(voPage);
     }
 
-    private LureFishGetVo getLureFishList(LureFishGet lure,String uid) {
+    private LureFishGetVo getLureFishList(LureFishGet lure, String uid) {
         LureFishGetVo vo = new LureFishGetVo();
         vo.setFishKind(lure.getFishKind());
         vo.setWeight(lure.getWeight() + "斤");
         vo.setLure(lure.getLure());
         vo.setTmp(lure.getTmpMin() + "℃-" + lure.getTmpMax() + "℃");
         vo.setId(lure.getId());
-        vo.setImageUrl(DataUtil.isEmpty(lure.getImageUrl())?"http://www.picture.lureking.cn/temp/1/v4zz82.jpg":lure.getImageUrl());
+        vo.setImageUrl(DataUtil.isEmpty(lure.getImageUrl()) ? "http://www.picture.lureking.cn/temp/1/v4zz82.jpg" : lure.getImageUrl());
         vo.setPres(lure.getPres() + "hPa");
         vo.setCond(lure.getCondTxtDay() + "-" + lure.getCondTxtNight());
         vo.setCreateTime(sdf.format(lure.getCreateTime()));
-        vo.setRemark(DataUtil.isEmpty(lure.getRemark())?"无备注":lure.getRemark());
-        vo.setAddress(DataUtil.isEmpty(lure.getAddress())?"大师不愿意透露地址":lure.getAddress());
+        vo.setRemark(DataUtil.isEmpty(lure.getRemark()) ? "无备注" : lure.getRemark());
+        vo.setAddress(DataUtil.isEmpty(lure.getAddress()) ? "大师不愿意透露地址" : lure.getAddress());
         vo.setLength(lure.getLength() + "cm");
         String str = sdf2.format(lure.getCreateTime());
         WaterLevel level = waterLevelService.queryByTime(str);
-        vo.setWaterLevel(level == null ? "暂无数据" : DataUtil.isEmpty(level.getWaterLevel())?"暂无数据":  level.getWaterLevel()+ "米");
+        vo.setWaterLevel(level == null ? "暂无数据" : DataUtil.isEmpty(level.getWaterLevel()) ? "暂无数据" : level.getWaterLevel() + "米");
         if (DataUtil.isNotEmpty(lure.getUse())) {
             vo.setUse(lure.getUse() == 1 ? "放油" : "放流");
         }
         if (lure.getGetFish() == 1) {
-            vo.setNum(lureFishGetService.getnum(str,uid));
-            vo.setDesc("中鱼" + lureFishGetService.getnum(str,uid) + "条");
+            vo.setNum(lureFishGetService.getnum(str, uid));
+            vo.setDesc("中鱼" + lureFishGetService.getnum(str, uid) + "条");
         } else {
             vo.setDesc("打龟");
         }
@@ -429,7 +438,7 @@ public class LureController {
     @SysLog("个体纪录查看")
     public Response<List<Geti>> geti(String type) {
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
-        List<Geti> monthCount = lureFishGetService.getGeti(loginUser.getUid(),type);
+        List<Geti> monthCount = lureFishGetService.getGeti(loginUser.getUid(), type);
         return Response.ok(monthCount);
     }
 
@@ -444,16 +453,14 @@ public class LureController {
     @ResponseBody
     @SysLog("查看鱼获共享")
     public Response<Page<FishShare>> fishShare(LureFishGetQuery query) throws Exception {
-       /* if (DataUtil.isEmpty(query.getPage()) || query.getPage() == 0) {
-            DingDingTalkUtils.sendDingDingMsg(RequestContext.getCurrentUser().getNickName() + "查看共享鱼获！");
-        }*/
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        query.setLimit(1);
+        if(DataUtil.isEmpty(query.getLimit())){
+            query.setLimit(10);
+        }
         query.setNotUid((RequestContext.getCurrentUser().getUid()));
         query.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
-        query.setPage(query.getLimit() * (query.getPage()));
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
         List<FishShare> voList = new ArrayList<>();
@@ -471,7 +478,20 @@ public class LureController {
         share.setSize(lure.getLength() + "厘米-" + lure.getWeight() + "斤");
         share.setUrl(lure.getImageUrl());
         share.setName(lure.getUserName());
-        share.setUse(lure.getUserName()+(lure.getUse()==2?"把鱼放流了！给他点赞！":"把鱼吃了!"));
+        share.setUse(lure.getUserName() + (lure.getUse() == 2 ? "把鱼放流了！给他点赞！" : "把鱼吃了!"));
+        if(DataUtil.isNotEmpty(lure.getProvince())){
+            if(DataUtil.isEmpty(lure.getCity())){
+                share.setAdd(lure.getProvince());
+            }else{
+                share.setAdd(lure.getProvince()+"·"+lure.getCity());
+            }
+        }
+        long  days= DateUtil.betweenDays(lure.getCreateTime(), new Date());
+        if(days==0){
+            share.setTime("今天");
+        }else{
+            share.setTime(days+"天前");
+        }
         return share;
     }
 
@@ -510,5 +530,62 @@ public class LureController {
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         List<FirstFish> monthCount = lureFishGetService.firstFish(loginUser.getUid());
         return Response.ok(monthCount);
+    }
+
+    @RequestMapping(value = "/api/getIndexWeatherAndWaterLevel")
+    @ResponseBody
+    @SysLog("获取首页天气及水位")
+    public Response<IndexWeatherAndWaterLevelVo> getIndexWeatherAndWaterLevel(MiniAppIndex index) throws Exception {
+        if(DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevel"))){
+            log.error("获取首页天气及水位缓存");
+            Object o=RedisUtil.get("getIndexWeatherAndWaterLevel");
+            return Response.ok(JSONObject.parseObject((String)RedisUtil.get("getIndexWeatherAndWaterLevel"), IndexWeatherAndWaterLevelVo.class));
+        }
+        Weather weather = null;
+        if (DataUtil.isEmpty(index.getLat()) || DataUtil.isEmpty(index.getLng())) {
+            weather = weatherService.queryLastOne();
+        } else {
+            weather = WeatherUtils.getWeather(index.getLng() + "," + index.getLat());
+        }
+        IndexWeatherAndWaterLevelVo vo = new IndexWeatherAndWaterLevelVo();
+        BeanUtils.copyProperties(weather, vo);
+        ShuiWenWaterLevel shuiWenWaterLevel = shuiWenWaterLevelService.queryLastOne();
+        vo.setWaterLevel(getLevel(shuiWenWaterLevel));
+        vo.setDownOrUp(shuiWenWaterLevel.getDownOrUp());
+        vo.setValue(shuiWenWaterLevel.getValue());
+        RedisUtil.set("getIndexWeatherAndWaterLevel", JSONObject.toJSONString(vo),1800);
+        return Response.ok(vo);
+    }
+
+    private String getLevel(ShuiWenWaterLevel shuiWenWaterLevel) {
+        List<ShuiWenWaterLevelJson> shuiWenWaterLevelJsons = parseArray(shuiWenWaterLevel.getData(), ShuiWenWaterLevelJson.class);
+        List<ShuiWenWaterLevelJson> hankou = shuiWenWaterLevelJsons.stream().filter(w -> w.getStnm().equals("汉口")).collect(Collectors.toList());
+        return MoneyUtil.formatMoney(hankou.get(0).getZ());
+    }
+
+
+    @RequestMapping(value = "/api/getIndexWeatherAndWaterLevelNow")
+    @ResponseBody
+    @SysLog("获取实时天气及水位")
+    public Response<IndexWeatherAndWaterLevelVoNow> getIndexWeatherAndWaterLevelNow(MiniAppIndex index) throws Exception {
+        if(DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevelNow"))){
+            log.error("获取实时天气及水位缓存");
+            Object o=RedisUtil.get("getIndexWeatherAndWaterLevelNow");
+            return Response.ok(JSONObject.parseObject((String)RedisUtil.get("getIndexWeatherAndWaterLevelNow"), IndexWeatherAndWaterLevelVoNow.class));
+        }
+        IndexWeatherAndWaterLevelVoNow weather = null;
+        if (DataUtil.isEmpty(index.getLat()) || DataUtil.isEmpty(index.getLng())) {
+            weather = NewWeatherUtils.getWeather("114.186769,30.453926");
+        } else {
+            weather = NewWeatherUtils.getWeather(index.getLng() + "," + index.getLat());
+        }
+        IndexWeatherAndWaterLevelVoNow vo = new IndexWeatherAndWaterLevelVoNow();
+        BeanUtils.copyProperties(weather, vo);
+        ShuiWenWaterLevel shuiWenWaterLevel = shuiWenWaterLevelService.queryLastOne();
+        vo.setWaterLevel(getLevel(shuiWenWaterLevel));
+        vo.setDownOrUp(shuiWenWaterLevel.getDownOrUp());
+        vo.setValue(shuiWenWaterLevel.getValue());
+        RedisUtil.set("getIndexWeatherAndWaterLevelNow", JSONObject.toJSONString(vo),1800);
+        return Response.ok(vo);
     }
 }

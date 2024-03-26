@@ -13,4 +13,6 @@ public interface WeatherMapper extends BaseMapper<Weather,Long> {
 
 
     Weather queryByDate(String date);
+
+    Weather queryLastOne();
 }

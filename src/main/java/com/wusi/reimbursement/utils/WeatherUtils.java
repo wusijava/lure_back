@@ -66,7 +66,6 @@ public class WeatherUtils {
         System.out.println(response.getBody());
         com.alibaba.fastjson.JSONObject jsonObject = com.alibaba.fastjson.JSONObject.parseObject(response.getBody());
         //获取第二层数据
-        System.out.println(response.getBody());
         String daily = jsonObject.getJSONArray("daily").get(0).toString();
         JSONObject jj = JSONObject.parseObject(daily);
         data.setCondTxtDay(jj.getString("textDay"));

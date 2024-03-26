@@ -5,13 +5,17 @@
             <id column="id" property="id" jdbcType="BIGINT"/>
             <result column="data" property="data" jdbcType="VARCHAR"/>
             <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="down_or_up" property="downOrUp" jdbcType="INTEGER"/>
+            <result column="value" property="value" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="table">shui_wen_water_level</sql>
     <sql id="Base_Column_List">
             `id`,
             `data`,
-            `create_time`
+            `create_time`,
+            `down_or_up`,
+            `value`
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -30,6 +34,12 @@
                 </if>
                 <if test="endTime != null">
                     and DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
+                </if>
+                <if test="downOrUp != null">
+                    AND `downOrUp`=#{down_or_up}
+                </if>
+                <if test="value != null and value != ''">
+                    AND `value`=#{value}
                 </if>
             </trim>
         </where>
@@ -66,12 +76,16 @@
         (
             `id`,
             `data`,
-            `create_time`
+            `create_time`,
+            `down_or_up`,
+            `value`
         )
         VALUES(
             #{id},
             #{data},
-            #{createTime}
+            #{createTime},
+            #{downOrUp},
+            #{value}
         )
     </insert>
 
@@ -81,14 +95,18 @@
         (
             `id`,
             `data`,
-            `create_time`
+            `create_time`,
+            `down_or_up`,
+            `value`
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
             (
             #{cm.id},
             #{cm.data},
-            #{cm.createTime}
+            #{cm.createTime},
+            #{cm.downOrUp},
+            #{cm.value}
             )
         </foreach>
     </insert>
@@ -121,5 +139,12 @@
         FROM
         <include refid="table"/>
         where  DATE_FORMAT(create_time,'%Y-%m-%d') = #{createTime} limit 1
+    </select>
+    <select id="queryLastOne" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        order by id desc limit 1
     </select>
 </mapper>

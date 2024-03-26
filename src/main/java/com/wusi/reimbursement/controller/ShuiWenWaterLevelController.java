@@ -11,6 +11,7 @@ import com.wusi.reimbursement.service.WaterLevelService;
 import com.wusi.reimbursement.utils.DataUtil;
 import com.wusi.reimbursement.utils.DateUtil;
 import com.wusi.reimbursement.utils.DingDingTalkUtils;
+import com.wusi.reimbursement.utils.MoneyUtil;
 import com.wusi.reimbursement.vo.ShuiWenWaterLevelJson;
 import com.wusi.reimbursement.vo.ShuiWenWaterLevelVo;
 import com.wusi.reimbursement.vo.WaterLevelVo;
@@ -32,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.alibaba.fastjson.JSON.parseArray;
 
 /**
  * @ Description   :  长江水文水位数据监控
@@ -64,9 +68,25 @@ public class ShuiWenWaterLevelController {
             ShuiWenWaterLevel data=new ShuiWenWaterLevel();
             data.setCreateTime(new Date());
             data.setData(json);
+            ShuiWenWaterLevel lastOne = shuiWenWaterLevelService.queryLastOne();
+            String sub=MoneyUtil.subtract(getLevel(data), getLevel(lastOne));
+            if(MoneyUtil.largeMoney(sub,"0")){
+                data.setDownOrUp(1);
+            }else if(MoneyUtil.largeMoney("0",sub)){
+                data.setDownOrUp(-1);
+            }else {
+                data.setDownOrUp(0);
+            }
+            data.setValue(sub);
             shuiWenWaterLevelService.insert(data);
         }
 
+    }
+
+    private String getLevel(ShuiWenWaterLevel shuiWenWaterLevel) {
+        List<ShuiWenWaterLevelJson> shuiWenWaterLevelJsons = parseArray(shuiWenWaterLevel.getData(), ShuiWenWaterLevelJson.class);
+        List<ShuiWenWaterLevelJson> hankou = shuiWenWaterLevelJsons.stream().filter(w -> w.getStnm().equals("汉口")).collect(Collectors.toList());
+        return MoneyUtil.formatMoney(hankou.get(0).getZ());
     }
     @RequestMapping(value = "getWaterLevelList")
     public Response<Page> getWaterLevelList(ShuiWenWaterLevelQuery query) {

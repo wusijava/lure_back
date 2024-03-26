@@ -10,4 +10,6 @@ import com.wusi.reimbursement.entity.Weather;
 public interface WeatherService extends BaseService<Weather,Long> {
 
     Weather queryByDate(String date);
+
+    Weather queryLastOne();
 }

@@ -15,4 +15,14 @@ public class FishShare {
     private String url;
 
     private String use;
+
+    /**
+     * 鱼友圈显示时间
+     */
+    private String time;
+
+    /**
+     * 地址
+     */
+    private String add;
 }

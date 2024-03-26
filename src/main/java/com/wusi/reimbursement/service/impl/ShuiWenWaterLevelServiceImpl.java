@@ -28,4 +28,9 @@ public class ShuiWenWaterLevelServiceImpl extends BaseMybatisServiceImpl<ShuiWen
     public ShuiWenWaterLevel queryByDate(String format) {
         return shuiWenWaterLevelMapper.queryByDate(format);
     }
+
+    @Override
+    public ShuiWenWaterLevel queryLastOne() {
+        return shuiWenWaterLevelMapper.queryLastOne();
+    }
 }

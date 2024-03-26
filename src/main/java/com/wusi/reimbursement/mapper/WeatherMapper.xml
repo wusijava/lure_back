@@ -176,6 +176,14 @@
         WHERE DATE_FORMAT(date,'%Y-%m-%d') = #{date} limit 1;
     </select>
 
+    <select id="queryLastOne" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+      order by id desc limit 1;
+    </select>
+
     <insert id="insert" parameterType="com.wusi.reimbursement.entity.Weather" useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO
