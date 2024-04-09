@@ -37,4 +37,10 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     List<SpendPai> spendPai();
 
     List<FirstFish> firstFish(String uid);
+
+    List<CalendarFish> getCalendarFish(String month, String uid);
+
+    MyMiniProData myXcxData(String uid);
+
+    void updateNickName(String nickName, String nickName1);
 }

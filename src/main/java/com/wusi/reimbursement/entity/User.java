@@ -25,6 +25,11 @@ public class User implements Identifiable<Long> {
   private String provinceCode;
   private String remark;
 
+  /**
+   * 头像图片
+   */
+  private String img;
+
   public enum State {
     /**
      * 开启

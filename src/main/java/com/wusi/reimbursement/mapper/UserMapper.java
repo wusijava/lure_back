@@ -3,6 +3,9 @@ package com.wusi.reimbursement.mapper;
 import com.wusi.reimbursement.base.dao.mybatis.BaseMapper;
 import com.wusi.reimbursement.entity.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 
 @Mapper
@@ -24,4 +27,8 @@ public interface UserMapper extends BaseMapper<User,Long> {
      * @return
      */
     User findByUid(String uid);
+
+    List<User> queryByUidList(@Param("uid") List<String> uid);
+
+    User queryRepeateUser(@Param("id") Long id, @Param("nickName") String nickName);
 }

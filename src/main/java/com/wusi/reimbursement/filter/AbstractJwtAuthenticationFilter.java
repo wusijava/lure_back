@@ -62,6 +62,7 @@ public abstract class AbstractJwtAuthenticationFilter extends OncePerRequestFilt
                     requestUser.setStoreMarkCode(user.getStoreMarkCode());
                     requestUser.setCityCode(user.getCityCode());
                     requestUser.setProvinceCode(user.getProvinceCode());
+                    requestUser.setImg(user.getImg());
                     RequestContext.setCurrentUser(requestUser);
                     if (!isLogoutUrl(request)) {
                         JwtUtil.refreshAndAddTokenToResponseHeader(request, response, user.getId(), user.getUsername(), getTokenStoreResolver());

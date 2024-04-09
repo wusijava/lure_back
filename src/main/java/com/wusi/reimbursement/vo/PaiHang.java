@@ -8,4 +8,8 @@ public class PaiHang {
     private String name;
     private Integer num;
     private String desc;
+    /**
+     * 头像地址
+     */
+    private String img;
 }

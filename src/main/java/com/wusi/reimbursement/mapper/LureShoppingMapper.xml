@@ -180,6 +180,11 @@
         </set>
         WHERE id=#{id}
     </update>
+    <update id="updateNickName">
+        UPDATE
+        <include refid="table"/>
+        set user_name=#{newNickName} where user_name=#{nickName}
+    </update>
     <delete id="deleteById">
         delete from
         <include refid="table"/>

@@ -16,7 +16,8 @@
             <result column="city_code" property="cityCode" jdbcType="VARCHAR"/>
             <result column="province_code" property="provinceCode" jdbcType="VARCHAR"/>
             <result column="remark" property="remark" jdbcType="VARCHAR"/>
-        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="img" property="img" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="table">user</sql>
@@ -35,7 +36,8 @@
             `city_code`,
             `province_code`,
             `remark`,
-            create_time
+            create_time,
+            img
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -82,9 +84,12 @@
                     <if test="remark != null and remark != ''">
                         AND `remark`=#{remark}
                     </if>
-                <if test="createTime != null and createTime != ''">
-                    AND `create_time`=#{createTime}
-                </if>
+                    <if test="createTime != null and createTime != ''">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="img != null and img != ''">
+                        AND `img`=#{img}
+                    </if>
             </trim>
         </where>
         <if test="offset == null and limit != null">
@@ -131,7 +136,8 @@
             `city_code`,
             `province_code`,
             `remark`,
-            create_time
+            create_time,
+            img
         )
         VALUES(
             #{id},
@@ -148,7 +154,8 @@
             #{cityCode},
             #{provinceCode},
             #{remark},
-            #{createTime}
+            #{createTime},
+            #{img}
         )
     </insert>
 
@@ -169,7 +176,8 @@
             `pwd`,
             `city_code`,
             `province_code`,
-            `remark`
+            `remark`,
+            img
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
@@ -187,7 +195,8 @@
             #{cm.pwd},
             #{cm.cityCode},
             #{cm.provinceCode},
-            #{cm.remark}
+            #{cm.remark},
+            #{cm.img}
             )
         </foreach>
     </insert>
@@ -257,7 +266,32 @@
             <if test="remark != null and remark != ''">
                  `remark`=#{remark},
             </if>
+            <if test="img != null and img != ''">
+                `img`=#{img},
+            </if>
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="queryByUidList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <where>
+            <if test="uid != null and uid.size>0">
+                `uid` in
+                <foreach collection="uid" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="queryRepeateUser" resultType="com.wusi.reimbursement.entity.User">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        where nick_name = #{nickName} and id != #{id}
+    </select>
 </mapper>

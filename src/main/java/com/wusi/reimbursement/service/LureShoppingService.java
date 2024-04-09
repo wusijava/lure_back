@@ -10,4 +10,6 @@ import com.wusi.reimbursement.entity.LureShopping;
 public interface LureShoppingService extends BaseService<LureShopping,Long> {
 
     void delById(Long id);
+
+    void updateNickName(String nickName, String newNickName);
 }

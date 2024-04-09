@@ -3,6 +3,8 @@ package com.wusi.reimbursement.service;
 import com.wusi.reimbursement.base.service.BaseService;
 import com.wusi.reimbursement.entity.User;
 
+import java.util.List;
+
 
 public interface UserService extends BaseService<User,Long> {
     /**
@@ -32,7 +34,7 @@ public interface UserService extends BaseService<User,Long> {
      * @param newPassword
      * @@return
      */
-    String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword);
+    String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword,String nickName,String url);
 
     /**
      * 修改密码
@@ -54,4 +56,8 @@ public interface UserService extends BaseService<User,Long> {
     User createUser( String name, String mobile,String creater);
 
     User findByName(String name);
+
+    List<User> queryByUidList(List<String> uid);
+
+    User queryRepeateUser(Long id,String nickName);
 }

@@ -13,4 +13,6 @@ public class UserInfo {
     private String mobile;
 
     private String uid;
+
+    private String nickName;
 }

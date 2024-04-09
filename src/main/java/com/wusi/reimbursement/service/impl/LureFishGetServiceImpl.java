@@ -4,11 +4,14 @@ import com.wusi.reimbursement.base.dao.mybatis.BaseMapper;
 import com.wusi.reimbursement.base.service.impl.BaseMybatisServiceImpl;
 import com.wusi.reimbursement.entity.LureFishGet;
 import com.wusi.reimbursement.entity.LureShopping;
+import com.wusi.reimbursement.entity.RequestContext;
+import com.wusi.reimbursement.entity.User;
 import com.wusi.reimbursement.mapper.LureFishGetMapper;
 import com.wusi.reimbursement.query.LureFishGetQuery;
 import com.wusi.reimbursement.query.LureShoppingQuery;
 import com.wusi.reimbursement.service.LureFishGetService;
 import com.wusi.reimbursement.service.LureShoppingService;
+import com.wusi.reimbursement.service.UserService;
 import com.wusi.reimbursement.utils.DataUtil;
 import com.wusi.reimbursement.utils.DateUtil;
 import com.wusi.reimbursement.utils.MoneyUtil;
@@ -40,6 +43,8 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
     private LureFishGetService lureFishGetService;
     @Autowired
     private LureShoppingService lureShoppingService;
+    @Autowired
+    private UserService userService;
 
     @Override
     protected BaseMapper<LureFishGet, Long> getBaseMapper() {
@@ -120,7 +125,8 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             if (DataUtil.isEmpty(total)) {
                 total = new BigDecimal("0");
             }
-            innerData.setSpend(MoneyUtil.add(String.valueOf(total), MoneyUtil.multiply(String.valueOf(innerData.getNum()), "10")) + ":(装备:" + String.valueOf(total) + "+油费:" + MoneyUtil.multiply(String.valueOf(innerData.getNum()), "10") + ")");
+            //innerData.setSpend(MoneyUtil.add(String.valueOf(total), MoneyUtil.multiply(String.valueOf(innerData.getNum()), "10")) + ":(装备:" + String.valueOf(total) + "+油费:" + MoneyUtil.multiply(String.valueOf(innerData.getNum()), "10") + ")");
+            innerData.setSpend(String.valueOf(total));
             innerData.setMaxFail(continueGetFish(0, 0, mr, 0,""));
             innerData.setFishDesc(getFishDesc(mr.stream().filter(w->w.getGetFish()==1).collect(Collectors.toList())));
             dataList.add(innerData);
@@ -280,6 +286,8 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
         } else {
             lureFishGets = lureFishGetService.queryByType(type, new SimpleDateFormat("yyyy-MM").format(new Date()));
         }
+        List<String> uid = lureFishGets.stream().map(w -> w.getUid()).distinct().collect(Collectors.toList());
+        List<User> users = userService.queryByUidList(uid);
         List<String> collect = lureFishGets.stream().map(w -> w.getUserName()).distinct().collect(Collectors.toList());
         List<PaiHang> data = new ArrayList<>();
         for (String name : collect) {
@@ -298,6 +306,7 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
                 rate.add(mr);
             }
             paiHang.setDesc(getFishDesc(rate));
+            paiHang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
             data.add(paiHang);
         }
         data.sort(Comparator.comparing(PaiHang::getNum).reversed());
@@ -338,6 +347,8 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
         if(lureFishGets.size()==0){
             return list;
         }
+        List<String> uid = lureFishGets.stream().map(w -> w.getUid()).distinct().collect(Collectors.toList());
+        List<User> users = userService.queryByUidList(uid);
         List<String> collect = lureFishGets.stream().map(w -> w.getUserName()).distinct().collect(Collectors.toList());
         for (String name : collect) {
             GuiWang wang=new GuiWang();
@@ -352,11 +363,12 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             }
             wang.setRate(BigDecimal.valueOf(rateWang.stream().filter(w -> w.getGetFish() == 0).count()).divide(BigDecimal.valueOf(rateWang.stream().map(w -> w.getDay()).distinct().collect(Collectors.toList()).size()), 4, BigDecimal.ROUND_HALF_UP));
             wang.setName(name);
+            wang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
             list.add(wang);
         }
         list.sort(Comparator.comparing(GuiWang::getRate).reversed());
         for (int i = 0; i <= list.size() - 1; i++) {
-            list.get(i).setRateStr(list.get(i).getRate().multiply(new BigDecimal("100")).setScale(2).toString()+"%");
+            list.get(i).setNum(list.get(i).getRate().multiply(new BigDecimal("100")).setScale(2).toString()+"%");
             list.get(i).setIndex("第" + (i + 1) + "名");
         }
         return list;
@@ -417,5 +429,68 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             list.add(firstFish);
         }
         return list;
+    }
+
+    @Override
+    public List<CalendarFish> getCalendarFish(String month, String uid) {
+        List<CalendarFish> list = new ArrayList<>();
+        SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
+        List<LureFishGet> calendarFish = lureFishGetMapper.getCalendarFish(month, uid);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateUtil.strToDate3(month));
+        int actualMaximum = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        List<String> monthList=new ArrayList<>();
+        for (int i=1; i<=actualMaximum;i++){
+            calendar.set(Calendar.DAY_OF_MONTH, i);
+            monthList.add(format2.format(calendar.getTime()));
+        }
+        for (String day : monthList) {
+            List<LureFishGet> collect = calendarFish.stream().filter(w -> format2.format(w.getCreateTime()).equals(day)).collect(Collectors.toList());
+            CalendarFish data=new CalendarFish();
+            data.setDate(day);
+            data.setGetFish(collect.size()==0?-1:collect.get(0).getGetFish());
+            List<MonthRate> rate = new ArrayList<>();
+            for (LureFishGet lureFishGet : collect) {
+                MonthRate mr = new MonthRate();
+                mr.setGetFish(lureFishGet.getGetFish());
+                mr.setMonth(new SimpleDateFormat("yyyy-MM").format(lureFishGet.getCreateTime()));
+                mr.setDay(new SimpleDateFormat("yyyy-MM-dd").format(lureFishGet.getCreateTime()));
+                mr.setUse(lureFishGet.getUse());
+                mr.setFishKind(lureFishGet.getFishKind());
+                rate.add(mr);
+            }
+            if(data.getGetFish()==1){
+                data.setFishDesc(getFishDesc(rate));
+            }
+            list.add(data);
+        }
+        return list;
+    }
+
+    @Override
+    public MyMiniProData myXcxData(String uid) {
+        MyMiniProData data=new MyMiniProData();
+        LureFishGet query = new LureFishGetQuery();
+        query.setUid(uid);
+        List<LureFishGet> lureFishGets = lureFishGetService.queryList(query);
+        List<LureFishGet> collect = lureFishGets.stream().filter(w -> w.getGetFish() == 1).collect(Collectors.toList());
+        List<String> fishKind = collect.stream().map(w -> w.getFishKind()).distinct().collect(Collectors.toList());
+        data.setTotalNum(lureFishGets.size());
+        data.setFishNum(collect.size());
+        data.setFishKindNum(fishKind.size());
+        RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
+        String sql = "select sum(price)  as s from lure_shopping where  uid ='" + loginUser.getUid() + "';";
+        List<Map<String, Object>> map = jdbcTemplate.queryForList(sql);
+        BigDecimal total = (BigDecimal) map.get(0).getOrDefault("s", 0);
+        if (DataUtil.isEmpty(total)) {
+            total = new BigDecimal("0");
+        }
+        data.setSpend(String.valueOf(total));
+        return data;
+    }
+
+    @Override
+    public void updateNickName(String nickName, String newNickName) {
+        lureFishGetMapper.updateNickName(nickName,newNickName);
     }
 }

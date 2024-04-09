@@ -67,6 +67,7 @@ public class MyUserPermissionResolver extends UserPermissionResolver {
             loginUser.setStoreMarkCode(user.getStoreMarkCode());
             loginUser.setCityCode(user.getCityCode());
             loginUser.setProvinceCode(user.getProvinceCode());
+            loginUser.setImg(user.getImg());
             return loginUser;
         } else {
             return null;

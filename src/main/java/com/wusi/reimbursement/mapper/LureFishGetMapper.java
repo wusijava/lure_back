@@ -26,4 +26,8 @@ public interface LureFishGetMapper extends BaseMapper<LureFishGet,Long> {
     List<LureFishGet> queryByType(String type, String time);
 
     List<LureFishGet> queryByMonth(@Param("type")String type, @Param("format") String format);
+
+    List<LureFishGet>  getCalendarFish(String month, String uid);
+
+    void updateNickName(@Param("nickName") String nickName, @Param("newNickName") String newNickName);
 }

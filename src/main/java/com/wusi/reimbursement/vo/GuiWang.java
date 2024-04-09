@@ -15,11 +15,13 @@ public class GuiWang {
      * 打龟率
      */
     private BigDecimal rate;
-    private String rateStr;
+    private String num;
 
     /**
      * 名次
      */
     private String index;
+
+    private String img;
 
 }

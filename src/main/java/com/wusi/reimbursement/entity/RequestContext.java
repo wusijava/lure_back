@@ -48,5 +48,7 @@ public class RequestContext {
         private String cityCode;
 
         private String provinceCode;
+
+        private String img;
     }
 }

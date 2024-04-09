@@ -138,7 +138,9 @@ public class LureController {
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        query.setLimit(1);
+        if(DataUtil.isEmpty(query.getLimit())){
+            query.setLimit(10);
+        }
         if (query.getRecommend() != null && query.getRecommend() == 0) {
             query.setUid(RequestContext.getCurrentUser().getUid());
             query.setRecommend(null);
@@ -353,7 +355,9 @@ public class LureController {
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        query.setLimit(1);
+        if(DataUtil.isEmpty(query.getLimit())){
+            query.setLimit(10);
+        }
         query.setUid(RequestContext.getCurrentUser().getUid());
         query.setPage(query.getLimit() * (query.getPage()));
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
@@ -459,19 +463,22 @@ public class LureController {
         if(DataUtil.isEmpty(query.getLimit())){
             query.setLimit(10);
         }
-        query.setNotUid((RequestContext.getCurrentUser().getUid()));
+        //query.setNotUid((RequestContext.getCurrentUser().getUid()));
         query.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
+        List<LureFishGet> list=page.getContent();
+        List<String> uid = list.stream().map(w -> w.getUid()).distinct().collect(Collectors.toList());
+        List<User> users = userService.queryByUidList(uid);
         List<FishShare> voList = new ArrayList<>();
         for (LureFishGet lure : page.getContent()) {
-            voList.add(getFishShareList(lure));
+            voList.add(getFishShareList(lure,users));
         }
         Page<FishShare> voPage = new PageImpl<>(voList, pageable, page.getTotalElements());
         return Response.ok(voPage);
     }
 
-    private FishShare getFishShareList(LureFishGet lure) {
+    private FishShare getFishShareList(LureFishGet lure,List<User> users) {
         FishShare share = new FishShare();
         share.setKind(lure.getFishKind());
         share.setLure(lure.getLure());
@@ -492,6 +499,7 @@ public class LureController {
         }else{
             share.setTime(days+"天前");
         }
+        share.setImg(users.stream().filter(w->w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg());
         return share;
     }
 
@@ -587,5 +595,13 @@ public class LureController {
         vo.setValue(shuiWenWaterLevel.getValue());
         RedisUtil.set("getIndexWeatherAndWaterLevelNow", JSONObject.toJSONString(vo),1800);
         return Response.ok(vo);
+    }
+
+    @RequestMapping(value = "/api/xcxData")
+    @ResponseBody
+    @SysLog("获取小程序我的页面数据")
+    public Response<MyMiniProData> myXcxData(){
+        RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
+        return Response.ok( lureFishGetService.myXcxData(loginUser.getUid()));
     }
 }

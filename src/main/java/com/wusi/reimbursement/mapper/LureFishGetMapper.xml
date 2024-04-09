@@ -407,6 +407,14 @@
         </if>
 
     </select>
+    <select id="getCalendarFish"  resultMap="BaseResultMap">
+
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        where DATE_FORMAT(create_time,'%Y-%m') = #{month} and uid =#{uid}
+    </select>
 
     <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureFishGet">
         UPDATE
@@ -501,6 +509,11 @@
             </if>
         </set>
         WHERE id=#{id}
+    </update>
+    <update id="updateNickName">
+        UPDATE
+        <include refid="table"/>
+        set user_name=#{newNickName} where user_name=#{nickName}
     </update>
 
     <delete id="deleteById">

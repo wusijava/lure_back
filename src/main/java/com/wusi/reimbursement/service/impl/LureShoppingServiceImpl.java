@@ -5,6 +5,7 @@ import com.wusi.reimbursement.base.service.impl.BaseMybatisServiceImpl;
 import com.wusi.reimbursement.entity.LureShopping;
 import com.wusi.reimbursement.mapper.LureShoppingMapper;
 import com.wusi.reimbursement.service.LureShoppingService;
+import com.wusi.reimbursement.utils.DataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,5 +28,13 @@ public class LureShoppingServiceImpl extends BaseMybatisServiceImpl<LureShopping
     @Override
     public void delById(Long id) {
         lureShoppingMapper.deleteById(id);
+    }
+
+    @Override
+    public void updateNickName(String nickName, String newNickName) {
+        if(DataUtil.isEmpty(newNickName)||DataUtil.isEmpty(newNickName)){
+            return;
+        }
+        lureShoppingMapper.updateNickName(nickName,newNickName);
     }
 }

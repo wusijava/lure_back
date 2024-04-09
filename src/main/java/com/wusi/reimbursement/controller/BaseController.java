@@ -55,23 +55,27 @@ public class BaseController {
     public Response<UserInfo> login(String username, String password, HttpSession session) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         RequestContext.RequestUser user = RequestContext.getCurrentUser();
-        DingDingTalkUtils.sendDingDingMsg(user.getNickName()+"登录成功-"+sdf.format(new Date()));
+        DingDingTalkUtils.sendDingDingMsg(user.getNickName() + "登录成功-" + sdf.format(new Date()));
         UserInfo info = new UserInfo();
         info.setMobile(user.getMobile());
         info.setUsername(user.getUsername());
         info.setUid(user.getUid());
-        session.setAttribute("U",user);
+        info.setImage(user.getImg());
+        info.setNickName(user.getNickName());
+        session.setAttribute("U", user);
 
-        RedisUtil.set(user.getUid()+"-login", user.getUsername());
+        RedisUtil.set(user.getUid() + "-login", user.getUsername());
         Object user1 = session.getAttribute("user");
         return Response.ok(info);
     }
+
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     @ResponseBody
     public Response<List<HomeMenuList>> list() {
         List<HomeMenuList> list = roleService.findPermissionByType(0);
         return Response.ok(list);
     }
+
     @RequestMapping(value = "/productList", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("报销列表")
@@ -84,15 +88,16 @@ public class BaseController {
             query.setLimit(10);
         }
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
-        Page<Reimbursement>  page= reimbursementService.queryPage(query,pageable);
+        Page<Reimbursement> page = reimbursementService.queryPage(query, pageable);
         //System.out.println(page);
-        List<ReimbursementList> volist=new ArrayList<>();
-        for (Reimbursement reimbursement:page.getContent()){
+        List<ReimbursementList> volist = new ArrayList<>();
+        for (Reimbursement reimbursement : page.getContent()) {
             volist.add(getReimbursementLististVo(reimbursement));
         }
-        Page<ReimbursementList> vopage=new PageImpl<>(volist, pageable, page.getTotalElements());
+        Page<ReimbursementList> vopage = new PageImpl<>(volist, pageable, page.getTotalElements());
         return Response.ok(vopage);
     }
+
     private ReimbursementList getReimbursementLististVo(Reimbursement reimbursement) {
         ReimbursementList reimbursementList = new ReimbursementList();
         reimbursementList.setId(reimbursement.getId());
@@ -100,28 +105,31 @@ public class BaseController {
         reimbursementList.setTotalPrice(reimbursement.getTotalPrice());
         reimbursementList.setBuyChannel(reimbursement.getBuyChannel());
         reimbursementList.setBuyDate(DateUtil.formatDate(reimbursement.getBuyDate(), DateUtil.PATTERN_YYYY_MM_DD));
-        reimbursementList.setReimbursementDate(reimbursement.getReimbursementDate()==null ? "未上交单据":DateUtil.formatDate(reimbursement.getReimbursementDate(), DateUtil.PATTERN_YYYY_MM_DD));
-        reimbursementList.setRemitDate(reimbursement.getRemitDate()==null ? "未到账":DateUtil.formatDate(reimbursement.getRemitDate(), DateUtil.PATTERN_YYYY_MM_DD));
+        reimbursementList.setReimbursementDate(reimbursement.getReimbursementDate() == null ? "未上交单据" : DateUtil.formatDate(reimbursement.getReimbursementDate(), DateUtil.PATTERN_YYYY_MM_DD));
+        reimbursementList.setRemitDate(reimbursement.getRemitDate() == null ? "未到账" : DateUtil.formatDate(reimbursement.getRemitDate(), DateUtil.PATTERN_YYYY_MM_DD));
         reimbursementList.setState(reimbursement.getStateDesc());
         reimbursementList.setRemark(reimbursement.getRemark());
         return reimbursementList;
     }
+
     @RequestMapping(value = "/toDetails", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("报销详情")
     public Response<ReimbursementList> todetails(ReimbursementQuery query) {
-        Reimbursement reimbursement=reimbursementService.queryOne(query);
+        Reimbursement reimbursement = reimbursementService.queryOne(query);
         return Response.ok(getReimbursementLististVo(reimbursement));
     }
+
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("更新报销列表")
     public Response<String> update(ReimbursementList query) throws ParseException {
         System.out.println(query.toString());
-        Reimbursement reimbursement=getReimbursement(query);
+        Reimbursement reimbursement = getReimbursement(query);
         reimbursementService.updateByid(reimbursement);
         return Response.ok("ok");
     }
+
     private Reimbursement getReimbursement(ReimbursementList reimbursementList) throws ParseException {
         Reimbursement reimbursement = new Reimbursement();
         reimbursement.setId(reimbursementList.getId());
@@ -129,35 +137,37 @@ public class BaseController {
         reimbursement.setTotalPrice(reimbursementList.getTotalPrice());
         reimbursement.setBuyChannel(reimbursementList.getBuyChannel());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date buydate=simpleDateFormat.parse(reimbursementList.getBuyDate());
+        Date buydate = simpleDateFormat.parse(reimbursementList.getBuyDate());
         reimbursement.setBuyDate(buydate);
-        if("未上交单据".equals(reimbursementList.getReimbursementDate())){
+        if ("未上交单据".equals(reimbursementList.getReimbursementDate())) {
             reimbursement.setReimbursementDate(null);
-        }else{
-            Date reimbursementDate=simpleDateFormat.parse(reimbursementList.getReimbursementDate());
+        } else {
+            Date reimbursementDate = simpleDateFormat.parse(reimbursementList.getReimbursementDate());
             reimbursement.setReimbursementDate(reimbursementDate);
         }
-        if("未到账".equals(reimbursementList.getRemitDate())){
+        if ("未到账".equals(reimbursementList.getRemitDate())) {
             reimbursement.setRemitDate(null);
-        }else{
-            Date remitDate=simpleDateFormat.parse(reimbursementList.getRemitDate());
+        } else {
+            Date remitDate = simpleDateFormat.parse(reimbursementList.getRemitDate());
             reimbursement.setRemitDate(remitDate);
         }
         reimbursement.setState(reimbursement.getStatecode(reimbursementList.getState()));
         //
-        reimbursement.setRemark(reimbursementList.getRemark()==null?"  ":reimbursementList.getRemark());
+        reimbursement.setRemark(reimbursementList.getRemark() == null ? "  " : reimbursementList.getRemark());
 
         //reimbursement.setRemark(reimbursementList.getRemark());
         return reimbursement;
     }
+
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("保存报销明细")
     public Response<String> save(ReimbursementList reimbursementList) throws ParseException {
-        Reimbursement reimbursement=saveReimbursement(reimbursementList);
+        Reimbursement reimbursement = saveReimbursement(reimbursementList);
         reimbursementService.insert(reimbursement);
         return Response.ok("");
     }
+
     private Reimbursement saveReimbursement(ReimbursementList reimbursementList) throws ParseException {
         Reimbursement reimbursement = new Reimbursement();
         reimbursement.setId(reimbursementList.getId());
@@ -165,15 +175,16 @@ public class BaseController {
         reimbursement.setTotalPrice(reimbursementList.getTotalPrice());
         reimbursement.setBuyChannel(reimbursementList.getBuyChannel());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date buydate=simpleDateFormat.parse(reimbursementList.getBuyDate());
+        Date buydate = simpleDateFormat.parse(reimbursementList.getBuyDate());
         reimbursement.setBuyDate(buydate);
         reimbursement.setState(-1);
-        if(reimbursementList.getRemark()==null||reimbursementList.getRemark().equals("")){
+        if (reimbursementList.getRemark() == null || reimbursementList.getRemark().equals("")) {
             reimbursement.setRemark("");
         }
         reimbursement.setRemark(reimbursementList.getRemark());
         return reimbursement;
     }
+
     @RequestMapping(value = "/del", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("删除报销")
@@ -186,26 +197,27 @@ public class BaseController {
         }
         return Response.ok("删除失败啊伙计！");
     }
+
     @RequestMapping(value = "/api/web/user/changePassword", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("修改密码")
-    public Response changePassword(String oldPassword, String newPassword) {
-        if (DataUtil.isEmpty(oldPassword)) {
-            return Response.fail("缺少原密码");
+    public Response changePassword(String oldPassword, String newPassword, String nickName, String url) {
+        if(DataUtil.isEmpty(oldPassword)&&DataUtil.isEmpty(newPassword)&&DataUtil.isEmpty(nickName)&&DataUtil.isEmpty(url)){
+            return Response.fail("至少需要修改一项!");
         }
-        if (DataUtil.isEmpty(newPassword)) {
-            return Response.fail("缺少新密码");
-        }
-        if (StringUtils.isChinese(newPassword)) {
-            return Response.fail("密码不能含有中文字符");
+        if(DataUtil.isNotEmpty(oldPassword)&&DataUtil.isNotEmpty(newPassword)){
+            if (StringUtils.isChinese(newPassword)) {
+                return Response.fail("密码不能含有中文字符!");
+            }
         }
         RequestContext.RequestUser user = RequestContext.getCurrentUser();
-        String result = userService.changePassword(Long.valueOf(user.getId()), user.getSalt(), user.getPassword(), oldPassword, newPassword);
+        String result = userService.changePassword(Long.valueOf(user.getId()), user.getSalt(), user.getPassword(), oldPassword, newPassword, nickName, url);
         if (result != null) {
             return Response.fail(result);
         }
-        return Response.ok("修改成功，请重新登录");
+        return Response.ok("修改成功");
     }
+
     //统计报销金额
     @RequestMapping(value = "/countReimbursement", method = RequestMethod.POST)
     @ResponseBody
@@ -213,32 +225,33 @@ public class BaseController {
     public Response spendMonth() {
 
         //未报销
-        String sql1="select sum(total_price)  as s from reimbursement where state=-1;";
+        String sql1 = "select sum(total_price)  as s from reimbursement where state=-1;";
         List<Map<String, Object>> map1 = jdbcTemplate.queryForList(sql1);
         //报销中
-        String sql2="select sum(total_price)  as s from reimbursement where state=0;";
+        String sql2 = "select sum(total_price)  as s from reimbursement where state=0;";
         List<Map<String, Object>> map2 = jdbcTemplate.queryForList(sql2);
         //已报销
-        String sql3="select sum(total_price)  as s from reimbursement where state= 1;";
+        String sql3 = "select sum(total_price)  as s from reimbursement where state= 1;";
         List<Map<String, Object>> map3 = jdbcTemplate.queryForList(sql3);
-        Object one=map1.get(0).getOrDefault("s", 0);
-        Object two=map2.get(0).getOrDefault("s", 0);
-        Object three=map3.get(0).getOrDefault("s", 0);
-        Reimbursement reimbursement=new Reimbursement();
-        if(one==null){
+        Object one = map1.get(0).getOrDefault("s", 0);
+        Object two = map2.get(0).getOrDefault("s", 0);
+        Object three = map3.get(0).getOrDefault("s", 0);
+        Reimbursement reimbursement = new Reimbursement();
+        if (one == null) {
             reimbursement.setRemark("0");
-        }else{
+        } else {
             reimbursement.setRemark(one.toString());
         }
-        if(two==null){
+        if (two == null) {
             reimbursement.setBuyChannel("0");
-        }else{
+        } else {
             reimbursement.setBuyChannel(two.toString());
         }
-        if(three==null){
+        if (three == null) {
             reimbursement.setProductName("0");
-        }else{
-            reimbursement.setProductName(three.toString());        }
+        } else {
+            reimbursement.setProductName(three.toString());
+        }
 
         return Response.ok(reimbursement);
     }
@@ -267,7 +280,7 @@ public class BaseController {
             return Response.fail("此昵称已存在！");
         }
         try {
-            userService.createUser(name,phone,user.getNickName());
+            userService.createUser(name, phone, user.getNickName());
         } catch (Exception e) {
             return Response.fail("新增异常！");
         }

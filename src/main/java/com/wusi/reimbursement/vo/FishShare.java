@@ -25,4 +25,6 @@ public class FishShare {
      * 地址
      */
     private String add;
+
+    private String img;
 }

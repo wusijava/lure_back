@@ -33,4 +33,6 @@ public class LoginUser implements Serializable {
     private String cityCode;
 
     private String provinceCode;
+
+    private String img;
 }
