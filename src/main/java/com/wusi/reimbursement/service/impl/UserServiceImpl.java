@@ -112,7 +112,7 @@ public class UserServiceImpl extends BaseMybatisServiceImpl<User,Long> implement
         String salt = PassWordUtil.generateSalt();
         query.setCreateTime(new Date());
         query.setMobile(mobile);
-        query.setUsername(mobile);
+        query.setUsername(mobile==null?name:mobile);
         query.setType(User.Type.USER.getCode());
         query.setUid(StringUtils.getMerchantNo());
         query.setSalt(salt);
@@ -122,6 +122,7 @@ public class UserServiceImpl extends BaseMybatisServiceImpl<User,Long> implement
         query.setCreateTime(new Date());
         query.setPwd(pwd);
         query.setRemark(creater);
+        query.setImg("https://www.picture.lureking.cn/temp/1/zeyj06.jpg");
         this.insert(query);
         return query;
     }

@@ -8,6 +8,7 @@ import com.wusi.reimbursement.resolver.UserPermissionResolver;
 import com.wusi.reimbursement.utils.JwtUtil;
 import com.wusi.reimbursement.vo.LoginUser;
 import com.wusi.reimbursement.vo.UsernamePasswordToken;
+import com.wusi.reimbursement.vo.WxUsernamePasswordToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -48,6 +49,9 @@ public abstract class AbstractJwtAuthenticationFilter extends OncePerRequestFilt
                 }
                 if (isLoginUrl(request)) {
                     user = getUserPermissionResolver().doAuthInfo(createUsernamePasswordToken(request));
+                }
+                if (isWxLoginUrl(request)) {
+                    user = getUserPermissionResolver().doWxAuthInfo(createWxUsernamePasswordToken(request));
                 }
                 if (user != null) {
                     RequestContext.RequestUser requestUser = new RequestContext.RequestUser();
@@ -112,6 +116,10 @@ public abstract class AbstractJwtAuthenticationFilter extends OncePerRequestFilt
         String password = request.getParameter("password");
         return new UsernamePasswordToken(username, password);
     }
+    protected WxUsernamePasswordToken createWxUsernamePasswordToken(HttpServletRequest request) {
+        String username = request.getParameter("code");
+        return new WxUsernamePasswordToken(username);
+    }
 
     /**
      * 权限相关
@@ -151,6 +159,13 @@ public abstract class AbstractJwtAuthenticationFilter extends OncePerRequestFilt
      */
     protected abstract boolean isProtectedUrl(HttpServletRequest request);
 
+    /**
+     * 微信登录url
+     *
+     * @param request
+     * @return
+     */
+    protected abstract Boolean isWxLoginUrl(HttpServletRequest request);
 
 
 }

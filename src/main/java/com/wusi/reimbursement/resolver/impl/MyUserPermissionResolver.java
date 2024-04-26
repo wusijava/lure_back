@@ -4,9 +4,16 @@ package com.wusi.reimbursement.resolver.impl;
 import com.wusi.reimbursement.entity.User;
 import com.wusi.reimbursement.resolver.UserPermissionResolver;
 import com.wusi.reimbursement.service.UserService;
+import com.wusi.reimbursement.utils.DataUtil;
 import com.wusi.reimbursement.utils.PassWordUtil;
 import com.wusi.reimbursement.vo.LoginUser;
 import com.wusi.reimbursement.vo.UsernamePasswordToken;
+import com.wusi.reimbursement.vo.WxUsernamePasswordToken;
+import com.wusi.reimbursement.wx.WxApi;
+import com.wusi.reimbursement.wx.WxConfigContainer;
+import com.wusi.reimbursement.wx.WxConfiguration;
+import com.wusi.reimbursement.wx.WxUtils;
+import com.wusi.reimbursement.wx.dto.OpenIdApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +24,9 @@ public class MyUserPermissionResolver extends UserPermissionResolver {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private WxApi wxApi;
+
 
 
 
@@ -28,6 +38,20 @@ public class MyUserPermissionResolver extends UserPermissionResolver {
     @Override
     public LoginUser getLoginUser(UsernamePasswordToken token) {
         User user = userService.findByUsername(token.getUsername());
+        return getLoginUser(user);
+    }
+
+    @Override
+    public LoginUser getWxLoginUser(WxUsernamePasswordToken token) throws Exception {
+        OpenIdApi openId = WxUtils.getOpenId(token.getCode(), WxConfiguration.getAppId(), WxConfiguration.getAppSecret());
+        if(DataUtil.isEmpty(openId.getOpenid())){
+            throw new UsernameAndPasswordException("openId获取失败");
+        }
+        User user;
+        user = userService.findByUsername(openId.getOpenid());
+        if(DataUtil.isEmpty(user)){
+            user = userService.createUser(openId.getOpenid(), null, null);
+        }
         return getLoginUser(user);
     }
 

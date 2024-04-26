@@ -13,4 +13,8 @@ public class FishCount {
      * 数量
      */
     private Integer num;
+
+    private String img;
+
+    private String desc;
 }

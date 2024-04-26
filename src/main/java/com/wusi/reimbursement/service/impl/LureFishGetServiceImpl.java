@@ -493,4 +493,15 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
     public void updateNickName(String nickName, String newNickName) {
         lureFishGetMapper.updateNickName(nickName,newNickName);
     }
+
+    @Override
+    public void editFish(Long id, String weight, String length) {
+        LureFishGet fishGet = lureFishGetService.queryById(id);
+        if(DataUtil.isEmpty(fishGet)){
+            return;
+        }
+        fishGet.setWeight(weight);
+        fishGet.setLat(length);
+        lureFishGetService.updateById(fishGet);
+    }
 }

@@ -48,7 +48,7 @@ public class ProductController {
     private MonitorRecordService monitorRecordService;
 
     @RequestMapping(value = "getProductState")
-    @Scheduled(cron = "0 0 1 * * ?")
+   // @Scheduled(cron = "0 0 1 * * ?")
     @ResponseBody
     public void product() throws IOException, InterruptedException {
         log.error("定时任务已启动!,{}", DateUtil.formatDate(new Date(), "yyyy-MM-dd"));

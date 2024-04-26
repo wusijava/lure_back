@@ -360,8 +360,9 @@
         order by create_time desc
     </select>
     <select id="fishCount" resultType="com.wusi.reimbursement.vo.FishCount" parameterType="java.lang.String">
-
-      SELECT fish_kind as fishName,count(id)  as num FROM lure_fish_get
+        select fn.fishName as fishName,fn.num as num ,lk.img as img ,lk.desc as `desc` FROM lure_fish_kind lk
+        INNER JOIN
+      (SELECT fish_kind as fishName,count(id)  as num FROM lure_fish_get
         <where>
             <trim prefixOverrides="and">
                 <if test="monthStr != null and monthStr != ''">
@@ -370,7 +371,8 @@
             </trim>
             and get_fish =1 and uid = #{uid}
         </where>
-      GROUP BY fish_kind  ORDER BY count(id) desc
+      GROUP BY fish_kind  ORDER BY count(id) ) fn
+        on lk.name=fn.fishName order by fn.num desc;
     </select>
     <select id="queryByType" resultMap="BaseResultMap" parameterType="java.lang.Long">
         SELECT

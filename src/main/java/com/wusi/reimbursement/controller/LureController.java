@@ -15,6 +15,7 @@ import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +64,13 @@ public class LureController {
     @Autowired
     private LureFishGetService lureFishGetService;
     @Autowired
-    private WaterLevelService waterLevelService;
-    @Autowired
     private WeatherService weatherService;
     @Autowired
     private UserService userService;
     @Autowired
     private ShuiWenWaterLevelService shuiWenWaterLevelService;
+    @Autowired
+    private FishCommentService fishCommentService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -359,7 +360,6 @@ public class LureController {
             query.setLimit(10);
         }
         query.setUid(RequestContext.getCurrentUser().getUid());
-        query.setPage(query.getLimit() * (query.getPage()));
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
         List<LureFishGetVo> voList = new ArrayList<>();
@@ -385,8 +385,8 @@ public class LureController {
         vo.setAddress(DataUtil.isEmpty(lure.getAddress()) ? "大师不愿意透露地址" : lure.getAddress());
         vo.setLength(lure.getLength() + "cm");
         String str = sdf2.format(lure.getCreateTime());
-        WaterLevel level = waterLevelService.queryByTime(str);
-        vo.setWaterLevel(level == null ? "暂无数据" : DataUtil.isEmpty(level.getWaterLevel()) ? "暂无数据" : level.getWaterLevel() + "米");
+        ShuiWenWaterLevel level = shuiWenWaterLevelService.queryByDate(str);
+        vo.setWaterLevel(level == null ? "无历史数据" :getLevel(level)+"m");
         if (DataUtil.isNotEmpty(lure.getUse())) {
             vo.setUse(lure.getUse() == 1 ? "放油" : "放流");
         }
@@ -480,6 +480,7 @@ public class LureController {
 
     private FishShare getFishShareList(LureFishGet lure,List<User> users) {
         FishShare share = new FishShare();
+        share.setId(lure.getId());
         share.setKind(lure.getFishKind());
         share.setLure(lure.getLure());
         share.setSize(lure.getLength() + "厘米-" + lure.getWeight() + "斤");
@@ -500,6 +501,9 @@ public class LureController {
             share.setTime(days+"天前");
         }
         share.setImg(users.stream().filter(w->w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg());
+        share.setComment(fishCommentService.queryComment(lure.getId()));
+        share.setZan(fishCommentService.queryZan(lure.getId()));
+        share.setIsZan(share.getZan().contains(RequestContext.getCurrentUser().getNickName()));
         return share;
     }
 
@@ -604,4 +608,79 @@ public class LureController {
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         return Response.ok( lureFishGetService.myXcxData(loginUser.getUid()));
     }
+
+    @RequestMapping(value = "/api/editFish")
+    @ResponseBody
+    @SysLog("修改鱼的尺寸大小")
+    public Response<String> editFish(Long id,String weight,String length) {
+        if (DataUtil.isEmpty(id)) {
+            return Response.fail("缺少id!");
+        }
+        if (DataUtil.isEmpty(weight)) {
+            return Response.fail("缺少重量!");
+        }
+        if (DataUtil.isEmpty(length)) {
+            return Response.fail("缺少长度!");
+        }
+        try {
+            lureFishGetService.editFish(id, weight, length);
+        } catch (Exception e) {
+            return Response.fail("修改异常");
+        }
+        return Response.ok("修改成功");
+    }
+
+    @RequestMapping(value = "/api/comment")
+    @ResponseBody
+    @SysLog("鱼友圈评论")
+    public Response<String> comment(Long fishId,Long replyId,String comment) {
+        if (DataUtil.isEmpty(fishId)&&DataUtil.isEmpty(replyId)) {
+            return Response.fail("缺少id!");
+        }
+        if (DataUtil.isEmpty(comment)) {
+            return Response.fail("评论不能为空!");
+        }
+        fishCommentService.add(fishId,replyId,comment);
+        return Response.ok("评论成功");
+    }
+
+    @RequestMapping(value = "/api/delComment")
+    @ResponseBody
+    @SysLog("删除鱼友圈评论")
+    public Response<String> delComment(Long id) {
+        if (DataUtil.isEmpty(id)) {
+            return Response.fail("缺少id!");
+        }
+        try {
+            fishCommentService.deleteById(id);
+        } catch (Exception e) {
+            return Response.fail("删除失败");
+
+        }
+        return Response.ok("删除成功");
+    }
+
+    @RequestMapping(value = "/api/zan")
+    @ResponseBody
+    @SysLog("鱼友圈点赞")
+    public Response<String> zan(Long id) {
+        if (DataUtil.isEmpty(id)) {
+            return Response.fail("缺少id!");
+        }
+        fishCommentService.zan(id);
+        return Response.ok("点赞成功");
+    }
+
+    @RequestMapping(value = "/api/cancelZan")
+    @ResponseBody
+    @SysLog("鱼友圈点赞")
+    public Response<String> cancelZan(Long id) {
+        if (DataUtil.isEmpty(id)) {
+            return Response.fail("缺少id!");
+        }
+        fishCommentService.cancelZan(id);
+        return Response.ok("取消成功");
+    }
+
+
 }

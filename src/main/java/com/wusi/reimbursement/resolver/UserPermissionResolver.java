@@ -2,6 +2,7 @@ package com.wusi.reimbursement.resolver;
 
 import com.wusi.reimbursement.vo.LoginUser;
 import com.wusi.reimbursement.vo.UsernamePasswordToken;
+import com.wusi.reimbursement.vo.WxUsernamePasswordToken;
 import lombok.Data;
 
 public abstract class UserPermissionResolver {
@@ -24,6 +25,14 @@ public abstract class UserPermissionResolver {
     public abstract LoginUser getLoginUser(UsernamePasswordToken token);
 
     /**
+     * 获取微信登录用户
+     *
+     * @param token
+     * @return
+     */
+    public abstract LoginUser getWxLoginUser(WxUsernamePasswordToken token) throws Exception;
+
+    /**
      * 获取登录用户
      *
      * @param userId
@@ -40,6 +49,14 @@ public abstract class UserPermissionResolver {
         }
     }
 
+    public LoginUser doWxAuthInfo(WxUsernamePasswordToken token) throws Exception {
+        LoginUser loginUser = getWxLoginUser(token);
+        if (loginUser != null) {
+            return loginUser;
+        } else {
+            throw new UsernameAndPasswordException("微信登录失败");
+        }
+    }
     public LoginUser doAuthInfo(String userId) {
         return getLoginUser(userId);
     }

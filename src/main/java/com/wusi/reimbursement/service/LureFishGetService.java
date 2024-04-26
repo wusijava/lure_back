@@ -43,4 +43,6 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     MyMiniProData myXcxData(String uid);
 
     void updateNickName(String nickName, String nickName1);
+
+    void editFish(Long id, String weight, String length);
 }

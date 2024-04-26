@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.FishCommentMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.FishComment">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="fish_id" property="fishId" jdbcType="BIGINT"/>
+            <result column="reply_id" property="replyId" jdbcType="BIGINT"/>
+            <result column="comment" property="comment" jdbcType="VARCHAR"/>
+            <result column="comment_uid" property="commentUid" jdbcType="VARCHAR"/>
+            <result column="comment_name" property="commentName" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="type" property="type" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="table">fish_comment</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `fish_id`,
+            `reply_id`,
+            `comment`,
+            `comment_uid`,
+            `comment_name`,
+            `create_time`,
+            `type`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="fishId != null">
+                        AND `fish_id`=#{fishId}
+                    </if>
+                    <if test="replyId != null">
+                        AND `reply_id`=#{replyId}
+                    </if>
+                    <if test="comment != null and comment != ''">
+                        AND `comment`=#{comment}
+                    </if>
+                    <if test="commentUid != null and commentUid != ''">
+                        AND `comment_uid`=#{commentUid}
+                    </if>
+                    <if test="commentName != null and commentName != ''">
+                        AND `comment_name`=#{commentName}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="type != null">
+                        AND `type`=#{type}
+                    </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.FishComment" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `fish_id`,
+            `reply_id`,
+            `comment`,
+            `comment_uid`,
+            `comment_name`,
+            `create_time`,
+            `type`
+        )
+        VALUES(
+            #{id},
+            #{fishId},
+            #{replyId},
+            #{comment},
+            #{commentUid},
+            #{commentName},
+            #{createTime},
+            #{type}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `fish_id`,
+            `reply_id`,
+            `comment`,
+            `comment_uid`,
+            `comment_name`,
+            `create_time`,
+            `type`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.fishId},
+            #{cm.replyId},
+            #{cm.comment},
+            #{cm.commentUid},
+            #{cm.commentName},
+            #{cm.createTime},
+            #{cm.type}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.FishComment">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="fishId != null">
+                 `fish_id`=#{fishId},
+            </if>
+            <if test="replyId != null">
+                 `reply_id`=#{replyId},
+            </if>
+            <if test="comment != null and comment != ''">
+                 `comment`=#{comment},
+            </if>
+            <if test="commentUid != null and commentUid != ''">
+                 `comment_uid`=#{commentUid},
+            </if>
+            <if test="commentName != null and commentName != ''">
+                 `comment_name`=#{commentName},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="type != null">
+                 `type`=#{type},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+    <select id="queryByFishIdAndType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE fish_id=#{fishId}  and type=#{type}
+    </select>
+
+    <select id="queryByReplyId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE reply_id=#{replyId}
+    </select>
+
+    <delete id="deleteById">
+        delete from
+        <include refid="table"/>
+        WHERE
+        id=#{id}
+    </delete>
+
+    <delete id="cancelZan">
+        delete from
+        <include refid="table"/>
+        WHERE
+        fish_id=#{fishId} and comment_uid=#{uid} and type =2
+    </delete>
+</mapper>

@@ -2,8 +2,11 @@ package com.wusi.reimbursement.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class FishShare {
+    private Long id;
     private String name;
 
     private String kind;
@@ -27,4 +30,14 @@ public class FishShare {
     private String add;
 
     private String img;
+
+    /**
+     * 鱼友圈评论
+     */
+    private List<FishCommentVo> comment;
+
+    private List<String> zan;
+
+    private Boolean isZan;
+
 }

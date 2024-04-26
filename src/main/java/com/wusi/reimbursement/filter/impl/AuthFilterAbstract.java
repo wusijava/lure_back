@@ -54,4 +54,9 @@ public class AuthFilterAbstract extends AbstractJwtAuthenticationFilter {
                 && !pathMatcher.match("/login", request.getServletPath());
     }
 
+    @Override
+    protected Boolean isWxLoginUrl(HttpServletRequest request) {
+        return pathMatcher.match("/wxLogin", request.getServletPath());
+    }
+
 }

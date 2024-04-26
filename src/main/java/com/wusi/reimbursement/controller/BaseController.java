@@ -13,6 +13,9 @@ import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.HomeMenuList;
 import com.wusi.reimbursement.vo.ReimbursementList;
 import com.wusi.reimbursement.vo.UserInfo;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,6 +72,24 @@ public class BaseController {
         return Response.ok(info);
     }
 
+    @ApiOperation(value = "微信登录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "code",value = "微信授权码",required = true,dataType = "String",paramType="form" ),
+            @ApiImplicitParam(name = "wxAppid",value = "微信appid",required = true,dataType = "String",paramType="form")
+    })
+    @RequestMapping(value = "wxLogin", method = RequestMethod.POST)
+    @ResponseBody
+    public Response<UserInfo> wxLogin( String code, String wxAppid, HttpServletRequest request){
+        RequestContext.RequestUser user = RequestContext.getCurrentUser();
+        UserInfo info = new UserInfo();
+        info.setMobile(user.getMobile());
+        info.setUsername(user.getUsername());
+        info.setUid(user.getUid());
+        info.setImage(user.getImg());
+        info.setNickName(user.getNickName());
+        return Response.ok(info);
+
+    }
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     @ResponseBody
     public Response<List<HomeMenuList>> list() {
