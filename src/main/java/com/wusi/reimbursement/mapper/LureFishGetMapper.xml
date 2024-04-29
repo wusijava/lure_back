@@ -418,6 +418,12 @@
         where DATE_FORMAT(create_time,'%Y-%m') = #{month} and uid =#{uid}
     </select>
 
+    <select id="baoKou"  resultType="com.wusi.reimbursement.vo.MonthRate">
+
+
+    SELECT DATE_FORMAT(create_time,'%Y-%m-%d') as day,fish_kind as fishKind ,address as address from lure_fish_get where DATE_FORMAT(create_time,'%Y-%m-%d') in
+    (SELECT DATE_FORMAT(create_time,'%Y-%m-%d')   from lure_fish_get where uid= #{uid} GROUP BY uid ,DATE_FORMAT(create_time,'%Y-%m-%d') HAVING count(*) >=#{num}) and uid =#{uid}
+    </select>
     <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureFishGet">
         UPDATE
         <include refid="table"/>

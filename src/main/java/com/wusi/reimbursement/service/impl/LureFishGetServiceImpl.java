@@ -504,4 +504,20 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
         fishGet.setLat(length);
         lureFishGetService.updateById(fishGet);
     }
+
+    @Override
+    public List<BaoKouVo> baoKou(Integer num,String uid) {
+        List<BaoKouVo> data=new ArrayList<>();
+        List<MonthRate> monthRates = lureFishGetMapper.baoKou(num, uid);
+        List<String> days = monthRates.stream().map(MonthRate::getDay).distinct().collect(Collectors.toList());
+        for (String day : days) {
+            BaoKouVo vo=new BaoKouVo();
+            vo.setDate(day);
+            List<MonthRate> collect = monthRates.stream().filter(w -> w.getDay().equals(day)).collect(Collectors.toList());
+            vo.setFishDesc(getFishDesc(collect));
+            vo.setAddress(collect.get(0).getAddress());
+            data.add(vo);
+        }
+        return data;
+    }
 }

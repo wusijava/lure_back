@@ -45,4 +45,6 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     void updateNickName(String nickName, String nickName1);
 
     void editFish(Long id, String weight, String length);
+
+    List<BaoKouVo> baoKou(Integer num,String uid);
 }

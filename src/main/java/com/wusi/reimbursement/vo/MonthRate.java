@@ -14,5 +14,7 @@ public class MonthRate {
 
     private String fishKind;
 
+    private String address;
+
 
 }

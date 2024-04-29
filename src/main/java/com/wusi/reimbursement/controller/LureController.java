@@ -682,5 +682,13 @@ public class LureController {
         return Response.ok("取消成功");
     }
 
-
+    @RequestMapping(value = "/api/baoKou")
+    @ResponseBody
+    @SysLog("暴扣记录")
+    public Response<List<BaoKouVo>> baoKou(Integer num) {
+        if (DataUtil.isEmpty(num)) {
+            return Response.fail("缺少条数!");
+        }
+        return Response.ok( lureFishGetService.baoKou(num,RequestContext.getCurrentUser().getUid()));
+    }
 }
