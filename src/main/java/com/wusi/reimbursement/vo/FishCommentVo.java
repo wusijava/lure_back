@@ -22,4 +22,8 @@ public class FishCommentVo {
 
     private String time;
 
+    private boolean canDelete;
+
+    private String img;
+
 }

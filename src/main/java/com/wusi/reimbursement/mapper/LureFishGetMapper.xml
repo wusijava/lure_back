@@ -374,6 +374,22 @@
       GROUP BY fish_kind  ORDER BY count(id) ) fn
         on lk.name=fn.fishName order by fn.num desc;
     </select>
+
+    <select id="lureGet" resultType="com.wusi.reimbursement.vo.FishCount" parameterType="java.lang.String">
+        select fn.lure as fishName,fn.num as num ,l.img as img ,l.desc as `desc` FROM lure l
+        INNER JOIN
+        (SELECT lure as lure,count(id) as num FROM lure_fish_get
+        <where>
+            <trim prefixOverrides="and">
+                <if test="monthStr != null and monthStr != ''">
+                    AND DATE_FORMAT(create_time,'%Y-%m') = #{monthStr}
+                </if>
+            </trim>
+            and get_fish =1 and uid = #{uid}
+        </where>
+        GROUP BY lure  ORDER BY count(id) ) fn
+        on l.lure=fn.lure order by fn.num desc;
+    </select>
     <select id="queryByType" resultMap="BaseResultMap" parameterType="java.lang.Long">
         SELECT
         <include refid="Base_Column_List"/>
@@ -423,6 +439,24 @@
 
     SELECT DATE_FORMAT(create_time,'%Y-%m-%d') as day,fish_kind as fishKind ,address as address from lure_fish_get where DATE_FORMAT(create_time,'%Y-%m-%d') in
     (SELECT DATE_FORMAT(create_time,'%Y-%m-%d')   from lure_fish_get where uid= #{uid} GROUP BY uid ,DATE_FORMAT(create_time,'%Y-%m-%d') HAVING count(*) >=#{num}) and uid =#{uid}
+    </select>
+    <select id="queryByDateAndUidList" resultType="com.wusi.reimbursement.vo.MonthRate">
+        SELECT DATE_FORMAT(create_time,'%Y-%m-%d') as day,fish_kind as fishKind ,get_fish as getFish,uid as uid,user_name as name
+        FROM
+        <include refid="table"/>
+        <where>
+            <if test="day!=null">
+               and DATE_FORMAT(create_time,'%Y-%m-%d') = #{day}
+            </if>
+
+            <if test="uids != null and uids.size>0">
+               and `uid` in
+                <foreach collection="uids" item="id" index="index" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+
     </select>
     <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureFishGet">
         UPDATE

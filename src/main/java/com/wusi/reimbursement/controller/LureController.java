@@ -7,15 +7,11 @@ import com.wusi.reimbursement.common.ratelimit.anonation.RateLimit;
 import com.wusi.reimbursement.config.JmsMessaging;
 import com.wusi.reimbursement.config.SendMessage;
 import com.wusi.reimbursement.entity.*;
-import com.wusi.reimbursement.query.LureFishGetQuery;
-import com.wusi.reimbursement.query.LureShoppingQuery;
-import com.wusi.reimbursement.query.UserQuery;
+import com.wusi.reimbursement.query.*;
 import com.wusi.reimbursement.service.*;
 import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.*;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson.JSONObject.*;
@@ -52,6 +45,7 @@ public class LureController {
     @Autowired
     private LureShoppingService lureShoppingService;
     final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    final SimpleDateFormat day = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     @Autowired
     private JdbcTemplate jdbcTemplate;
     static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
@@ -71,6 +65,8 @@ public class LureController {
     private ShuiWenWaterLevelService shuiWenWaterLevelService;
     @Autowired
     private FishCommentService fishCommentService;
+    @Autowired
+    private CollectivityLureService collectivityLureService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -139,7 +135,7 @@ public class LureController {
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        if(DataUtil.isEmpty(query.getLimit())){
+        if (DataUtil.isEmpty(query.getLimit())) {
             query.setLimit(10);
         }
         if (query.getRecommend() != null && query.getRecommend() == 0) {
@@ -356,7 +352,7 @@ public class LureController {
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        if(DataUtil.isEmpty(query.getLimit())){
+        if (DataUtil.isEmpty(query.getLimit())) {
             query.setLimit(10);
         }
         query.setUid(RequestContext.getCurrentUser().getUid());
@@ -386,7 +382,7 @@ public class LureController {
         vo.setLength(lure.getLength() + "cm");
         String str = sdf2.format(lure.getCreateTime());
         ShuiWenWaterLevel level = shuiWenWaterLevelService.queryByDate(str);
-        vo.setWaterLevel(level == null ? "无历史数据" :getLevel(level)+"m");
+        vo.setWaterLevel(level == null ? "无历史数据" : getLevel(level) + "m");
         if (DataUtil.isNotEmpty(lure.getUse())) {
             vo.setUse(lure.getUse() == 1 ? "放油" : "放流");
         }
@@ -460,25 +456,25 @@ public class LureController {
         if (DataUtil.isEmpty(query.getPage())) {
             query.setPage(0);
         }
-        if(DataUtil.isEmpty(query.getLimit())){
+        if (DataUtil.isEmpty(query.getLimit())) {
             query.setLimit(10);
         }
         //query.setNotUid((RequestContext.getCurrentUser().getUid()));
         query.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
-        List<LureFishGet> list=page.getContent();
+        List<LureFishGet> list = page.getContent();
         List<String> uid = list.stream().map(w -> w.getUid()).distinct().collect(Collectors.toList());
         List<User> users = userService.queryByUidList(uid);
         List<FishShare> voList = new ArrayList<>();
         for (LureFishGet lure : page.getContent()) {
-            voList.add(getFishShareList(lure,users));
+            voList.add(getFishShareList(lure, users));
         }
         Page<FishShare> voPage = new PageImpl<>(voList, pageable, page.getTotalElements());
         return Response.ok(voPage);
     }
 
-    private FishShare getFishShareList(LureFishGet lure,List<User> users) {
+    private FishShare getFishShareList(LureFishGet lure, List<User> users) throws ParseException {
         FishShare share = new FishShare();
         share.setId(lure.getId());
         share.setKind(lure.getFishKind());
@@ -487,20 +483,20 @@ public class LureController {
         share.setUrl(lure.getImageUrl());
         share.setName(lure.getUserName());
         share.setUse(lure.getUserName() + (lure.getUse() == 2 ? "把鱼放流了！给他点赞！" : "把鱼吃了!"));
-        if(DataUtil.isNotEmpty(lure.getProvince())){
-            if(DataUtil.isEmpty(lure.getCity())){
+        if (DataUtil.isNotEmpty(lure.getProvince())) {
+            if (DataUtil.isEmpty(lure.getCity())) {
                 share.setAdd(lure.getProvince());
-            }else{
-                share.setAdd(lure.getProvince()+"·"+lure.getCity());
+            } else {
+                share.setAdd(lure.getProvince() + "·" + lure.getCity());
             }
         }
-        long  days= DateUtil.betweenDays(lure.getCreateTime(), new Date());
-        if(days==0){
+        long days = DateUtil.daysBetween(lure.getCreateTime(), new Date());
+        if (days == 0) {
             share.setTime("今天");
-        }else{
-            share.setTime(days+"天前");
+        } else {
+            share.setTime(days + "天前");
         }
-        share.setImg(users.stream().filter(w->w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg());
+        share.setImg(users.stream().filter(w -> w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg());
         share.setComment(fishCommentService.queryComment(lure.getId()));
         share.setZan(fishCommentService.queryZan(lure.getId()));
         share.setIsZan(share.getZan().contains(RequestContext.getCurrentUser().getNickName()));
@@ -548,10 +544,10 @@ public class LureController {
     @ResponseBody
     @SysLog("获取首页天气及水位")
     public Response<IndexWeatherAndWaterLevelVo> getIndexWeatherAndWaterLevel(MiniAppIndex index) throws Exception {
-        if(DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevel"))){
+        if (DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevel"))) {
             log.error("获取首页天气及水位缓存");
-            Object o=RedisUtil.get("getIndexWeatherAndWaterLevel");
-            return Response.ok(JSONObject.parseObject((String)RedisUtil.get("getIndexWeatherAndWaterLevel"), IndexWeatherAndWaterLevelVo.class));
+            Object o = RedisUtil.get("getIndexWeatherAndWaterLevel");
+            return Response.ok(JSONObject.parseObject((String) RedisUtil.get("getIndexWeatherAndWaterLevel"), IndexWeatherAndWaterLevelVo.class));
         }
         Weather weather = null;
         if (DataUtil.isEmpty(index.getLat()) || DataUtil.isEmpty(index.getLng())) {
@@ -565,7 +561,7 @@ public class LureController {
         vo.setWaterLevel(getLevel(shuiWenWaterLevel));
         vo.setDownOrUp(shuiWenWaterLevel.getDownOrUp());
         vo.setValue(shuiWenWaterLevel.getValue());
-        RedisUtil.set("getIndexWeatherAndWaterLevel", JSONObject.toJSONString(vo),1800);
+        RedisUtil.set("getIndexWeatherAndWaterLevel", JSONObject.toJSONString(vo), 1800);
         return Response.ok(vo);
     }
 
@@ -580,10 +576,10 @@ public class LureController {
     @ResponseBody
     @SysLog("获取实时天气及水位")
     public Response<IndexWeatherAndWaterLevelVoNow> getIndexWeatherAndWaterLevelNow(MiniAppIndex index) throws Exception {
-        if(DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevelNow"))){
+        if (DataUtil.isNotEmpty(RedisUtil.get("getIndexWeatherAndWaterLevelNow"))) {
             log.error("获取实时天气及水位缓存");
-            Object o=RedisUtil.get("getIndexWeatherAndWaterLevelNow");
-            return Response.ok(JSONObject.parseObject((String)RedisUtil.get("getIndexWeatherAndWaterLevelNow"), IndexWeatherAndWaterLevelVoNow.class));
+            Object o = RedisUtil.get("getIndexWeatherAndWaterLevelNow");
+            return Response.ok(JSONObject.parseObject((String) RedisUtil.get("getIndexWeatherAndWaterLevelNow"), IndexWeatherAndWaterLevelVoNow.class));
         }
         IndexWeatherAndWaterLevelVoNow weather = null;
         if (DataUtil.isEmpty(index.getLat()) || DataUtil.isEmpty(index.getLng())) {
@@ -597,22 +593,22 @@ public class LureController {
         vo.setWaterLevel(getLevel(shuiWenWaterLevel));
         vo.setDownOrUp(shuiWenWaterLevel.getDownOrUp());
         vo.setValue(shuiWenWaterLevel.getValue());
-        RedisUtil.set("getIndexWeatherAndWaterLevelNow", JSONObject.toJSONString(vo),1800);
+        RedisUtil.set("getIndexWeatherAndWaterLevelNow", JSONObject.toJSONString(vo), 1800);
         return Response.ok(vo);
     }
 
     @RequestMapping(value = "/api/xcxData")
     @ResponseBody
     @SysLog("获取小程序我的页面数据")
-    public Response<MyMiniProData> myXcxData(){
+    public Response<MyMiniProData> myXcxData() {
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
-        return Response.ok( lureFishGetService.myXcxData(loginUser.getUid()));
+        return Response.ok(lureFishGetService.myXcxData(loginUser.getUid()));
     }
 
     @RequestMapping(value = "/api/editFish")
     @ResponseBody
     @SysLog("修改鱼的尺寸大小")
-    public Response<String> editFish(Long id,String weight,String length) {
+    public Response<String> editFish(Long id, String weight, String length) {
         if (DataUtil.isEmpty(id)) {
             return Response.fail("缺少id!");
         }
@@ -633,15 +629,15 @@ public class LureController {
     @RequestMapping(value = "/api/comment")
     @ResponseBody
     @SysLog("鱼友圈评论")
-    public Response<String> comment(Long fishId,Long replyId,String comment) {
-        if (DataUtil.isEmpty(fishId)&&DataUtil.isEmpty(replyId)) {
+    public Response<List<FishCommentVo>> comment(Long fishId, Long replyId, String comment) {
+        if (DataUtil.isEmpty(fishId) && DataUtil.isEmpty(replyId)) {
             return Response.fail("缺少id!");
         }
         if (DataUtil.isEmpty(comment)) {
             return Response.fail("评论不能为空!");
         }
-        fishCommentService.add(fishId,replyId,comment);
-        return Response.ok("评论成功");
+        fishCommentService.add(fishId, replyId, comment);
+        return Response.ok(fishCommentService.queryComment(fishId));
     }
 
     @RequestMapping(value = "/api/delComment")
@@ -689,6 +685,136 @@ public class LureController {
         if (DataUtil.isEmpty(num)) {
             return Response.fail("缺少条数!");
         }
-        return Response.ok( lureFishGetService.baoKou(num,RequestContext.getCurrentUser().getUid()));
+        return Response.ok(lureFishGetService.baoKou(num, RequestContext.getCurrentUser().getUid()));
     }
+
+    @RequestMapping(value = "/api/lureGet")
+    @ResponseBody
+    @SysLog("统计解锁路亚饵")
+    public Response<List<FishCount>> lureGet() {
+        return Response.ok(lureFishGetService.lureGet(RequestContext.getCurrentUser().getUid(), null));
+    }
+
+    @RequestMapping(value = "/api/createCollectivityLure")
+    @ResponseBody
+    @SysLog("创建集体活动")
+    public Response<String> createCollectivityLure(CreateCollectivity data) {
+        try {
+            collectivityLureService.createCollectivity(RequestContext.getCurrentUser(), data);
+        } catch (Exception e) {
+            return Response.fail("创建失败");
+        }
+        return Response.ok("创建成功");
+    }
+
+
+    @RequestMapping(value = "/api/joinCollectivityLure")
+    @ResponseBody
+    @SysLog("加入集体活动")
+    public Response<String> joinCollectivityLure(Long id) {
+        try {
+            collectivityLureService.joinCollectivity(id);
+        } catch (Exception e) {
+            return Response.fail("加入失败");
+        }
+        return Response.ok("加入成功");
+    }
+
+    @RequestMapping(value = "/api/quitCollectivityLure")
+    @ResponseBody
+    @SysLog("加入集体活动")
+    public Response<String> quitCollectivityLure(Long id) {
+        try {
+            collectivityLureService.quitCollectivity(id);
+        } catch (Exception e) {
+            return Response.fail("退出失败");
+        }
+        return Response.ok("退出成功");
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "api/collectivityLureList")
+    @SysLog("路亚活动列表")
+    public Response<Page<CollectivityLureVo>> lureGetList(CollectivityLureQuery query) {
+        if (DataUtil.isEmpty(query.getPage())) {
+            query.setPage(0);
+        }
+        if (DataUtil.isEmpty(query.getLimit())) {
+            query.setLimit(10);
+        }
+        Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
+        Page<CollectivityLure> page = collectivityLureService.queryPage(query, pageable);
+        List<CollectivityLureVo> voList = new ArrayList<>();
+        for (CollectivityLure lure : page.getContent()) {
+            voList.add(getCollectivity(lure));
+        }
+        Page<CollectivityLureVo> voPage = new PageImpl<>(voList, pageable, page.getTotalElements());
+        return Response.ok(voPage);
+    }
+
+    private CollectivityLureVo getCollectivity(CollectivityLure lure) {
+        CollectivityLureVo vo=new CollectivityLureVo();
+        vo.setCreatorName(lure.getCreatorName());
+        vo.setActivityName(lure.getActivityName());
+        vo.setSlogan(lure.getSlogan());
+        vo.setAddress(lure.getAddress());
+        vo.setParticipantName(lure.getParticipantName());
+        if(lure.getState()==-1){
+            vo.setStateDesc("已关闭");
+        }else{
+            Integer days=DateUtil.daysBetween2(lure.getLureDate(), new Date());
+            vo.setStateDesc(days>1?"已过期":"进行中");
+            if(days>1 &&RequestContext.getCurrentUser().getUid().equals(lure.getCreatorUid())){
+                vo.setShowClose(Boolean.TRUE);
+            }
+        }
+        if(vo.getStateDesc().equals("进行中")&&!lure.getParticipantUid().contains(RequestContext.getCurrentUser().getUid())){
+            vo.setShowJoin(true);
+        }
+        List<String> uids = Arrays.asList(lure.getParticipantUid().split(";"));
+        List<String> names = Arrays.asList(lure.getParticipantName().split(";"));
+        List<MonthRate> lureFishGets = lureFishGetService.queryByDateAndUidList(format2.format(lure.getLureDate()), uids);
+        String fishDesc="";
+        for (String name : names) {
+            List<MonthRate> collect = lureFishGets.stream().filter(w -> w.getName().equals(name)).collect(Collectors.toList());
+            fishDesc=fishDesc+name+"("+getFishDesc(collect)+");";
+        }
+        vo.setFishDesc(fishDesc);
+        vo.setLureDate(day.format(lure.getLureDate()));
+        vo.setCreateTime(sdf.format(lure.getCreateTime()));
+        vo.setRemark(lure.getRemark());
+        vo.setId(lure.getId());
+        return vo;
+    }
+
+    private String getFishDesc(List<MonthRate> mr) {
+        if(DataUtil.isEmpty(mr)){
+            return "暂无记录";
+        }
+        if(mr.get(0).getGetFish()==0){
+            return "打龟";
+        }
+        String desc="";
+        List<String> fishKind = mr.stream().map(w -> w.getFishKind()).distinct().collect(Collectors.toList());
+        for (String fish : fishKind) {
+            long count = mr.stream().filter(w -> w.getFishKind().equals(fish)).count();
+            desc=desc+fish+"×"+count+"、";
+        }
+        return desc.substring(0,desc.length()-1);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "api/closeCollectivity")
+    @SysLog("关闭群活动")
+    public Response<String> lureGetList(Long id) {
+        CollectivityLure collectivityLure = collectivityLureService.queryById(id);
+        if(DataUtil.isEmpty(collectivityLure)){
+            return Response.fail("id有误");
+        }
+        collectivityLure.setState(-1);
+        collectivityLureService.updateById(collectivityLure);
+        return  Response.ok("关闭成功");
+    }
+
 }

@@ -33,4 +33,8 @@ public interface LureFishGetMapper extends BaseMapper<LureFishGet,Long> {
     void updateNickName(@Param("nickName") String nickName, @Param("newNickName") String newNickName);
 
     List<MonthRate> baoKou(@Param("num") Integer num, @Param("uid") String uid);
+
+    List<FishCount> lureGet(String uid, String monthStr);
+
+    List<MonthRate> queryByDateAndUidList(String day, List<String> uids);
 }

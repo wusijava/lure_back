@@ -1,5 +1,6 @@
 package com.wusi.reimbursement.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -8,6 +9,7 @@ public class CalendarFish {
 
     private Integer getFish;
 
+    @ApiModelProperty(value = "鱼获描述")
     private String fishDesc;
 
 }

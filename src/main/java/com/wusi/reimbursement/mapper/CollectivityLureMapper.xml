@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.CollectivityLureMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.CollectivityLure">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="creator_name" property="creatorName" jdbcType="VARCHAR"/>
+            <result column="creator_uid" property="creatorUid" jdbcType="VARCHAR"/>
+            <result column="participant_uid" property="participantUid" jdbcType="VARCHAR"/>
+            <result column="participant_name" property="participantName" jdbcType="VARCHAR"/>
+            <result column="lure_date" property="lureDate" jdbcType="TIMESTAMP"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="address" property="address" jdbcType="VARCHAR"/>
+            <result column="lng" property="lng" jdbcType="VARCHAR"/>
+            <result column="lat" property="lat" jdbcType="VARCHAR"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+            <result column="activity_name" property="activityName" jdbcType="VARCHAR"/>
+            <result column="slogan" property="slogan" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="table">collectivity_lure</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `creator_name`,
+            `creator_uid`,
+            `participant_uid`,
+            `participant_name`,
+            `lure_date`,
+            `create_time`,
+            `address`,
+            `lng`,
+            `lat`,
+            `remark`,
+            `activity_name`,
+            `slogan`,
+            `state`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="creatorName != null and creatorName != ''">
+                        AND `creator_name`=#{creatorName}
+                    </if>
+                    <if test="creatorUid != null and creatorUid != ''">
+                        AND `creator_uid`=#{creatorUid}
+                    </if>
+                    <if test="participantUid != null and participantUid != ''">
+                        AND `participant_uid`=#{participantUid}
+                    </if>
+                    <if test="participantName != null and participantName != ''">
+                        AND `participant_name`=#{participantName}
+                    </if>
+                    <if test="lureDate != null">
+                        AND `lure_date`=#{lureDate}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="address != null and address != ''">
+                        AND `address`=#{address}
+                    </if>
+                    <if test="lng != null and lng != ''">
+                        AND `lng`=#{lng}
+                    </if>
+                    <if test="lat != null and lat != ''">
+                        AND `lat`=#{lat}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+                    <if test="activityName != null and activityName != ''">
+                        AND `activity_name`=#{activityName}
+                    </if>
+                    <if test="slogan != null and slogan != ''">
+                        AND `slogan`=#{slogan}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+            </trim>
+        </where>
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.CollectivityLure" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `creator_name`,
+            `creator_uid`,
+            `participant_uid`,
+            `participant_name`,
+            `lure_date`,
+            `create_time`,
+            `address`,
+            `lng`,
+            `lat`,
+            `remark`,
+            `activity_name`,
+            `slogan`,
+            `state`
+        )
+        VALUES(
+            #{id},
+            #{creatorName},
+            #{creatorUid},
+            #{participantUid},
+            #{participantName},
+            #{lureDate},
+            #{createTime},
+            #{address},
+            #{lng},
+            #{lat},
+            #{remark},
+            #{activityName},
+            #{slogan},
+            #{state}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `creator_name`,
+            `creator_uid`,
+            `participant_uid`,
+            `participant_name`,
+            `lure_date`,
+            `create_time`,
+            `address`,
+            `lng`,
+            `lat`,
+            `remark`,
+            `activity_name`,
+            `slogan`,
+            `state`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.creatorName},
+            #{cm.creatorUid},
+            #{cm.participantUid},
+            #{cm.participantName},
+            #{cm.lureDate},
+            #{cm.createTime},
+            #{cm.address},
+            #{cm.lng},
+            #{cm.lat},
+            #{cm.remark},
+            #{cm.activityName},
+            #{cm.slogan},
+            #{cm.state}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.CollectivityLure">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="creatorName != null and creatorName != ''">
+                 `creator_name`=#{creatorName},
+            </if>
+            <if test="creatorUid != null and creatorUid != ''">
+                 `creator_uid`=#{creatorUid},
+            </if>
+            <if test="participantUid != null and participantUid != ''">
+                 `participant_uid`=#{participantUid},
+            </if>
+            <if test="participantName != null and participantName != ''">
+                 `participant_name`=#{participantName},
+            </if>
+            <if test="lureDate != null">
+                 `lure_date`=#{lureDate},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="address != null and address != ''">
+                 `address`=#{address},
+            </if>
+            <if test="lng != null and lng != ''">
+                 `lng`=#{lng},
+            </if>
+            <if test="lat != null and lat != ''">
+                 `lat`=#{lat},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+            <if test="activityName != null and activityName != ''">
+                 `activity_name`=#{activityName},
+            </if>
+            <if test="slogan != null and slogan != ''">
+                 `slogan`=#{slogan},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

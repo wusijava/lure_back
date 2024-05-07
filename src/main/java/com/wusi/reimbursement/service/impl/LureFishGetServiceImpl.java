@@ -364,7 +364,9 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             wang.setRate(BigDecimal.valueOf(rateWang.stream().filter(w -> w.getGetFish() == 0).count()).divide(BigDecimal.valueOf(rateWang.stream().map(w -> w.getDay()).distinct().collect(Collectors.toList()).size()), 4, BigDecimal.ROUND_HALF_UP));
             wang.setName(name);
             wang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
-            list.add(wang);
+            if(wang.getRate().compareTo(new BigDecimal(0)) == 1){
+                list.add(wang);
+            }
         }
         list.sort(Comparator.comparing(GuiWang::getRate).reversed());
         for (int i = 0; i <= list.size() - 1; i++) {
@@ -519,5 +521,15 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             data.add(vo);
         }
         return data;
+    }
+
+    @Override
+    public List<FishCount> lureGet(String uid, String monthStr) {
+        return lureFishGetMapper.lureGet(uid, monthStr);
+    }
+
+    @Override
+    public List<MonthRate> queryByDateAndUidList(String day, List<String> uids) {
+        return lureFishGetMapper.queryByDateAndUidList(day,uids);
     }
 }

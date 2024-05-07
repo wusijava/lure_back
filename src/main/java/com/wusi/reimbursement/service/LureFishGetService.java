@@ -47,4 +47,8 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     void editFish(Long id, String weight, String length);
 
     List<BaoKouVo> baoKou(Integer num,String uid);
+
+    List<FishCount> lureGet(String uid, String monthStr);
+
+    List<MonthRate>queryByDateAndUidList(String format, List<String> uids);
 }

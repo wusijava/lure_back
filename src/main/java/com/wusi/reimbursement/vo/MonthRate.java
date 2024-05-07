@@ -16,5 +16,9 @@ public class MonthRate {
 
     private String address;
 
+    private String uid;
+
+    private String name;
+
 
 }

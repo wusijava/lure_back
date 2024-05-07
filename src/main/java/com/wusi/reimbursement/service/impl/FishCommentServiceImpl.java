@@ -31,8 +31,8 @@ public class FishCommentServiceImpl extends BaseMybatisServiceImpl<FishComment,L
     private FishCommentMapper fishCommentMapper;
     @Autowired
     private LureFishGetService lureFishGetService;
-   // @Autowired
-   // private UserService userService;
+    @Autowired
+    private UserService userService;
 
 
     @Override
@@ -51,7 +51,7 @@ public class FishCommentServiceImpl extends BaseMybatisServiceImpl<FishComment,L
         }
         List<FishComment> fishComments = fishCommentMapper.queryByFishIdAndType(fishGet.getId(),1);
         if(DataUtil.isEmpty(fishComments)){
-            return null;
+            return new ArrayList<>();
         }
         List<FishCommentVo> dataList=new ArrayList<>();
         for (FishComment fishComment : fishComments) {
@@ -62,7 +62,8 @@ public class FishCommentServiceImpl extends BaseMybatisServiceImpl<FishComment,L
             vo.setName(fishComment.getCommentName());
             vo.setReply(getReply(fishComment.getId()));
             vo.setTime(new SimpleDateFormat("MM-dd HH:mm").format(fishComment.getCreateTime()));
-            //vo.setImg(userService.findByUid(fishComment.getCommentUid()).getImg());
+            vo.setImg(userService.findByUid(fishComment.getCommentUid()).getImg());
+            vo.setCanDelete(RequestContext.getCurrentUser().getUid().equals(fishComment.getCommentUid()));
             dataList.add(vo);
         }
          return dataList;
@@ -72,8 +73,9 @@ public class FishCommentServiceImpl extends BaseMybatisServiceImpl<FishComment,L
     public void add(Long fishId, Long replyId, String comment) {
         FishComment data=new FishComment();
         data.setComment(comment);
-        if(DataUtil.isEmpty(fishId)){
+        if(DataUtil.isNotEmpty(replyId)){
             data.setReplyId(replyId);
+            data.setFishId(null);
         }else{
             data.setFishId(fishId);
         }
@@ -120,7 +122,8 @@ public class FishCommentServiceImpl extends BaseMybatisServiceImpl<FishComment,L
             vo.setComment(fishComment.getComment());
             vo.setReply(getReply(fishComment.getId()));
             vo.setTime(new SimpleDateFormat("MM-dd HH:mm").format(fishComment.getCreateTime()));
-           // vo.setImg(userService.findByUid(fishComment.getCommentUid()).getImg());
+            vo.setImg(userService.findByUid(fishComment.getCommentUid()).getImg());
+            vo.setCanDelete(RequestContext.getCurrentUser().getUid().equals(fishComment.getCommentUid()));
             dataList.add(vo);
         }
         return dataList;

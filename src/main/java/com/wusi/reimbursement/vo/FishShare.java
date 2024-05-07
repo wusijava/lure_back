@@ -2,6 +2,7 @@ package com.wusi.reimbursement.vo;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -34,10 +35,11 @@ public class FishShare {
     /**
      * 鱼友圈评论
      */
-    private List<FishCommentVo> comment;
+    private List<FishCommentVo> comment= new ArrayList<>();
 
     private List<String> zan;
 
     private Boolean isZan;
+
 
 }
