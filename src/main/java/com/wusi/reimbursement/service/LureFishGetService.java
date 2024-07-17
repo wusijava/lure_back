@@ -51,4 +51,7 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
     List<FishCount> lureGet(String uid, String monthStr);
 
     List<MonthRate>queryByDateAndUidList(String format, List<String> uids);
+
+    LureFishGet selectByTraceId(String traceId);
+
 }

@@ -33,6 +33,9 @@
             <result column="user_name" property="userName" jdbcType="VARCHAR"/>
             <result column="get_fish" property="getFish" jdbcType="INTEGER"/>
             <result column="is_repeat" property="isRepeat" jdbcType="INTEGER"/>
+            <result column="trace_id" property="traceId" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+
     </resultMap>
 
     <sql id="table">lure_fish_get</sql>
@@ -67,7 +70,9 @@
             uid,
             user_name,
             `get_fish`,
-            is_repeat
+            is_repeat,
+            trace_id,
+            state
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -159,6 +164,12 @@
                     <if test="isRepeat != null ">
                         AND `is_repeat`=#{isRepeat}
                     </if>
+                <if test="traceId != null and traceId != ''">
+                    AND `trace_id`=#{traceId}
+                </if>
+                <if test="state != null ">
+                    AND `state`=#{state}
+                </if>
                 <if test="uid != null and uid != ''">
                     AND `uid`=#{uid}
                 </if>
@@ -173,7 +184,7 @@
                 </if>
             </trim>
         </where>
-        order by create_time desc
+        order by id desc
         <if test="offset == null and limit != null">
             limit #{limit}
         </if>
@@ -234,7 +245,9 @@
             `get_fish`,
             uid,
             user_name,
-            is_repeat
+            is_repeat,
+            trace_id,
+            state
         )
         VALUES(
             #{id},
@@ -267,7 +280,9 @@
             #{getFish},
             #{uid},
             #{userName},
-            #{isRepeat}
+            #{isRepeat},
+            #{traceId},
+            #{state}
         )
     </insert>
 
@@ -305,7 +320,9 @@
             `get_fish`,
             uid,
             user_name,
-            is_repeat
+            is_repeat,
+            trace_id,
+            state
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
@@ -340,7 +357,9 @@
             #{cm.getFish},
             #{cm.uid},
             #{cm.userName},
-            #{cm.isRepeat}
+            #{cm.isRepeat},
+            #{cm.traceId},
+            #{cm.state}
             )
         </foreach>
     </insert>
@@ -351,6 +370,14 @@
         FROM
         <include refid="table"/>
         WHERE id=#{id}
+    </select>
+
+    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE trace_id=#{traceId} limit 1
     </select>
     <select id="selectAll" resultMap="BaseResultMap" parameterType="java.lang.Long">
         SELECT

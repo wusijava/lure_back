@@ -5,9 +5,7 @@ import com.wusi.reimbursement.entity.*;
 import com.wusi.reimbursement.generator.CodeGenerator;
 import com.wusi.reimbursement.service.*;
 import com.wusi.reimbursement.service.impl.SmsServiceImpl;
-import com.wusi.reimbursement.utils.MoneyUtil;
-import com.wusi.reimbursement.utils.QrUtil;
-import com.wusi.reimbursement.utils.RedisUtil;
+import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.SelectionFish;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
@@ -20,13 +18,19 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.alibaba.fastjson.JSON;
+import com.wusi.reimbursement.wx.WxUtils;
+import com.wusi.reimbursement.wx.impl.WxApiImpl;
 import org.json.JSONString;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        System.out.println(RedisUtil.getExpire("202402281428401201154104"));
-        //System.out.println(list);
+        com.alibaba.fastjson.JSONObject jsonObject=JSONObject.parseObject("{\"ToUserName\":\"gh_06d7c0560094\",\"Encrypt\":\"LJ8V6jOjeC1YmWAyI/WPS+YtNNxQCFXKMvhsozCWFKsXznsKjNWDJEWQSqMRyPflTCANP7lNmzm0Zw15e1UJACllRP1ColP90lX7zxa/DURmi3SwGvjQ94C8GQqbOU0kiS5waw7viYkYzaZPmiFC1+zi5CW/U4Yi0JqpVuV/AEzcbhw8dRjVbBwkYfSUe2m2BDazjKPNHvwqdOoTagxG8VMlmsxqh/w/nTzxS7MO7P0cD6ey3xmkWb19F/2q+KLIr7Ial8rFTaMUYwXp6nuSrExAdm0NVnCG+NTWPaidnwbAac9HxtSpl0qxvtgZCVDJ2zG2rCwWeoYfRuZTwSHIb5AP7QpK5gn2iW/C1t9oSz5mWf2wj1aORS2soxmdgpp6SVTjnVGUwhnoYPxC0x99fcareM3Rz2RCyQqVL2Eb4ut9OFaNVbMJa3Uo6vonlwzUlplHXkCtw7PdBt7CNR/lprzCNFKx2ZcfcPeUCdzZuHS0+jfI5WGCxCjrbcYN+rzEnO/nuIf9JJaZt+s9NnMT8v7WmiQVKfVVlDgDjhqui8tNyrC3NuuxWQVPetIRAl8FoyMWFlz5fQCPRkFzZcT+8A==\"}");
+        String encrypt = jsonObject.getString("Encrypt");
+        //解密
+        WXBizMsgCrypt pc = new WXBizMsgCrypt("lureking", "kLYkSDFCcBuHE0hcqu51RBqmyKi3JXE8IxID8I7EQQr", "wxc18b3bfa3d91ff3a");
+        String jmResult = pc.decrypt(encrypt);
+        System.out.println(jmResult);
     /*SmsService  service=new SmsServiceImpl();
         SmsProxy proxy= new SmsProxy(service);
         proxy.send("c++");*/

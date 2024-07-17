@@ -82,6 +82,7 @@
                     </if>
             </trim>
         </where>
+        order by id desc
         <if test="offset == null and limit != null">
             limit #{limit}
         </if>

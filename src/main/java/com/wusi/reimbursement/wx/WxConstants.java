@@ -16,7 +16,8 @@ public class WxConstants {
     private static final String WX_PHONE_NUMBER_URL = "https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token={0}";
     private static final String WX_OPEN_PID_URL = "https://api.weixin.qq.com/wxa/getpluginopenpid?access_token={0}";
     private static final String WX_OPEN_ID_URL = "https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type=authorization_code";
-
+    private static final String WX_MSG_SECCHECK = "https://api.weixin.qq.com/wxa/msg_sec_check?access_token={0}";
+    private static final String WX_IMG_SECCHECK = "https://api.weixin.qq.com/wxa/media_check_async?access_token={0}";
     public static String getWxAccessTokenUrl(String appId,String appSecret){
         return MessageFormat.format(WX_ACCESS_TOKEN_URL,appId,appSecret);
     }
@@ -31,6 +32,12 @@ public class WxConstants {
 
     public static String getWxOpenIdUrl(String code,String appId,String appSecret){
         return MessageFormat.format(WX_OPEN_ID_URL,appId,appSecret,code);
+    }
+    public static String getWxMsgCheck(String accessToken){
+        return MessageFormat.format(WX_MSG_SECCHECK,accessToken);
+    }
+    public static String getWxImgCheck(String accessToken){
+        return MessageFormat.format(WX_IMG_SECCHECK,accessToken);
     }
 
     private static final String TEST_APP_SECRET = "40788e79dd987f0967229c69c74957cb";

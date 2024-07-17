@@ -26,4 +26,9 @@ public class CreateCollectivity {
     @ApiModelProperty(value = "活动口号")
     private  String slogan;
 
+    @ApiModelProperty(value = "微信code")
+    private String wxCode;
+
+
+
 }

@@ -2,10 +2,7 @@ package com.wusi.reimbursement.wx;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.wusi.reimbursement.wx.dto.AccessToken;
-import com.wusi.reimbursement.wx.dto.OpenIdApi;
-import com.wusi.reimbursement.wx.dto.OpenPidApi;
-import com.wusi.reimbursement.wx.dto.PhoneNumberApi;
+import com.wusi.reimbursement.wx.dto.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,5 +40,30 @@ public class WxUtils {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> formEntity = new HttpEntity<String>(jsonObject.toJSONString(), headers);
         return TEMPLATE.postForEntity(WxConstants.getWxOpenPidUrl(accessToken), formEntity,OpenPidApi.class).getBody();
+    }
+
+    public static MsgApi checkMsg(String accessToken, String content, Integer scene, String openId){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("content",content);
+        jsonObject.put("version",2);
+        jsonObject.put("scene",scene);
+        jsonObject.put("openid",openId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> formEntity = new HttpEntity<String>(jsonObject.toJSONString(), headers);
+        return TEMPLATE.postForEntity(WxConstants.getWxMsgCheck(accessToken), formEntity, MsgApi.class).getBody();
+    }
+
+    public static MsgApi checkImg(String accessToken, String media_url, Integer scene, String openId){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("media_url",media_url);
+        jsonObject.put("version",2);
+        jsonObject.put("scene",scene);
+        jsonObject.put("openid",openId);
+        jsonObject.put("media_type",2);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> formEntity = new HttpEntity<String>(jsonObject.toJSONString(), headers);
+        return TEMPLATE.postForEntity(WxConstants.getWxImgCheck(accessToken), formEntity, MsgApi.class).getBody();
     }
 }

@@ -53,6 +53,17 @@ public class LureFishGet implements Identifiable<Long> {
    */
   private Integer isRepeat;
 
+
+  /**
+   * 图片验证id
+   */
+  private String traceId;
+
+  /**
+   * 0待审核 1通过 -1驳回
+   */
+  private Integer state;
+
   public enum IsRepeat {
     no(0, "不重复"),
     yes(1, "重复的");

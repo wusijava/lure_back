@@ -21,4 +21,6 @@ public class SaveFish {
     private Integer eatFish;
     private Integer num;
     private String date;
+    private String wxRemarkCode;
+    private String wxImgCode;
 }

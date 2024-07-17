@@ -1,5 +1,7 @@
 package com.wusi.reimbursement.wx;
 
+import com.wusi.reimbursement.wx.dto.MsgApi;
+
 /**
  * @Description 描述
  * @Author duchong
@@ -9,4 +11,9 @@ package com.wusi.reimbursement.wx;
 public interface  WxApi {
 
     String getPhoneNumber(String code, String appId);
+
+
+    MsgApi checkMsg(String content, Integer scene, String wxCode);
+
+    MsgApi checkImg(String content, Integer scene, String wxCode);
 }

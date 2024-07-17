@@ -532,4 +532,12 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
     public List<MonthRate> queryByDateAndUidList(String day, List<String> uids) {
         return lureFishGetMapper.queryByDateAndUidList(day,uids);
     }
+
+    @Override
+    public LureFishGet selectByTraceId(String traceId) {
+        if(DataUtil.isEmpty(traceId)){
+            return null;
+        }
+        return lureFishGetMapper.selectByTraceId(traceId);
+    }
 }

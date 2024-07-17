@@ -62,5 +62,7 @@ public class CollectivityLureVo {
 
     private Boolean showJoin=false;
 
+    private Boolean showQuit=false;
+
     private String fishDesc;
 }

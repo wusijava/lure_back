@@ -5,7 +5,9 @@ import com.wusi.reimbursement.wx.WxApi;
 import com.wusi.reimbursement.wx.WxConfigContainer;
 import com.wusi.reimbursement.wx.WxConfiguration;
 import com.wusi.reimbursement.wx.WxUtils;
+import com.wusi.reimbursement.wx.dto.OpenIdApi;
 import com.wusi.reimbursement.wx.dto.PhoneNumberApi;
+import com.wusi.reimbursement.wx.dto.MsgApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,5 +48,20 @@ public class WxApiImpl implements WxApi {
         }
         return numberApi.getPhone_info().getPhoneNumber();
     }
+
+    @Override
+    public MsgApi checkMsg(String content, Integer scene, String wxCode) {
+        String accessToken = container.getCacheAccessToken(WxConfiguration.getAppId(), WxConfiguration.getAppSecret());
+        OpenIdApi openId = WxUtils.getOpenId(wxCode, WxConfiguration.getAppId(), WxConfiguration.getAppSecret());
+        return  WxUtils.checkMsg(accessToken, content, scene, openId.getOpenid());
+    }
+
+    @Override
+    public MsgApi checkImg(String media_url, Integer scene, String wxCode) {
+        String accessToken = container.getCacheAccessToken(WxConfiguration.getAppId(), WxConfiguration.getAppSecret());
+        OpenIdApi openId = WxUtils.getOpenId(wxCode, WxConfiguration.getAppId(), WxConfiguration.getAppSecret());
+        return  WxUtils.checkImg(accessToken, media_url, scene, openId.getOpenid());
+    }
+
 
 }

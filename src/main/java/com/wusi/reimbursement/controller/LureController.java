@@ -11,7 +11,10 @@ import com.wusi.reimbursement.query.*;
 import com.wusi.reimbursement.service.*;
 import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.*;
+import com.wusi.reimbursement.wx.dto.MsgApi;
+import com.wusi.reimbursement.wx.impl.WxApiImpl;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +70,8 @@ public class LureController {
     private FishCommentService fishCommentService;
     @Autowired
     private CollectivityLureService collectivityLureService;
+    @Autowired
+    private WxApiImpl wxApi;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -249,6 +254,22 @@ public class LureController {
     @SysLog("保存中鱼或打龟数据")
     @RateLimit(permitsPerSecond = 0.2, ipLimit = true, description = "限制频率")
     public Response<String> saveFish(SaveFish saveFish) throws Exception {
+        String traceId="";
+        if(DataUtil.isNotEmpty(saveFish.getWxRemarkCode())){
+            MsgApi s = wxApi.checkMsg(saveFish.getRemark(), 1,saveFish.getWxRemarkCode());
+            if(!s.getResult().getSuggest().equals("pass")){
+                return Response.fail("文字包含敏感字符，请修改！");
+            }
+            if(DataUtil.isNotEmpty(saveFish.getUrl())&&DataUtil.isNotEmpty(saveFish.getWxImgCode())){
+                MsgApi imgREsult = wxApi.checkImg(saveFish.getUrl(), 1,saveFish.getWxImgCode());
+                if(!imgREsult.getErrmsg().equals("ok")){
+                    return Response.fail("图片包含敏感内容，请修改！");
+                }
+                if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
+                    traceId=  imgREsult.getTrace_id();
+                }
+            }
+        }
         Date date = saveFish.getDate() == null ? new Date() : new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
         if (DateUtil.isSameDay(date, new Date())) {
             date = new Date();
@@ -279,6 +300,14 @@ public class LureController {
         data.setRemark(saveFish.getRemark());
         data.setUse(saveFish.getEatFish());
         data.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
+        if(DataUtil.isNotEmpty(traceId)){
+            data.setTraceId(traceId);
+        }
+        if(DataUtil.isNotEmpty(saveFish.getUrl())){
+            data.setState(0);
+        }else{
+            data.setState(1);
+        }
         data.setGetFish((DataUtil.isNotEmpty(saveFish.getGetFish()) && saveFish.getGetFish() == 0) ? 0 : 1);
         if (DataUtil.isNotEmpty(weather)) {
             data.setCondTxtDay(weather.getCondTxtDay());
@@ -355,6 +384,7 @@ public class LureController {
         if (DataUtil.isEmpty(query.getLimit())) {
             query.setLimit(10);
         }
+        query.setState(1);
         query.setUid(RequestContext.getCurrentUser().getUid());
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
@@ -482,7 +512,7 @@ public class LureController {
         share.setSize(lure.getLength() + "厘米-" + lure.getWeight() + "斤");
         share.setUrl(lure.getImageUrl());
         share.setName(lure.getUserName());
-        share.setUse(lure.getUserName() + (lure.getUse() == 2 ? "把鱼放流了！给他点赞！" : "把鱼吃了!"));
+        share.setUse(lure.getUse() == 2 ? "放流" : "放油");
         if (DataUtil.isNotEmpty(lure.getProvince())) {
             if (DataUtil.isEmpty(lure.getCity())) {
                 share.setAdd(lure.getProvince());
@@ -629,12 +659,18 @@ public class LureController {
     @RequestMapping(value = "/api/comment")
     @ResponseBody
     @SysLog("鱼友圈评论")
-    public Response<List<FishCommentVo>> comment(Long fishId, Long replyId, String comment) {
+    public Response<List<FishCommentVo>> comment(Long fishId, Long replyId, String comment,String wxCode) {
         if (DataUtil.isEmpty(fishId) && DataUtil.isEmpty(replyId)) {
             return Response.fail("缺少id!");
         }
         if (DataUtil.isEmpty(comment)) {
             return Response.fail("评论不能为空!");
+        }
+        if(DataUtil.isNotEmpty(wxCode)){
+            MsgApi s = wxApi.checkMsg(comment, 1,wxCode);
+            if(!s.getResult().getSuggest().equals("pass")){
+                return Response.fail("包含敏感字符，请修改！");
+            }
         }
         fishCommentService.add(fishId, replyId, comment);
         return Response.ok(fishCommentService.queryComment(fishId));
@@ -699,6 +735,12 @@ public class LureController {
     @ResponseBody
     @SysLog("创建集体活动")
     public Response<String> createCollectivityLure(CreateCollectivity data) {
+        if(DataUtil.isNotEmpty(data.getWxCode())){
+            MsgApi s = wxApi.checkMsg(data.getRemark()+data.getActivityName()+data.getAddress()+data.getSlogan(), 1,data.getWxCode());
+            if(!s.getResult().getSuggest().equals("pass")){
+                return Response.fail("包含敏感字符，请修改！");
+            }
+        }
         try {
             collectivityLureService.createCollectivity(RequestContext.getCurrentUser(), data);
         } catch (Exception e) {
@@ -764,9 +806,12 @@ public class LureController {
             vo.setStateDesc("已关闭");
         }else{
             Integer days=DateUtil.daysBetween2(lure.getLureDate(), new Date());
-            vo.setStateDesc(days>1?"已过期":"进行中");
-            if(days>1 &&RequestContext.getCurrentUser().getUid().equals(lure.getCreatorUid())){
+            vo.setStateDesc(days>0?"已过期":"进行中");
+            if(days<=0 &&RequestContext.getCurrentUser().getUid().equals(lure.getCreatorUid())){
                 vo.setShowClose(Boolean.TRUE);
+            }
+            if(days<=0&&lure.getParticipantUid().contains(RequestContext.getCurrentUser().getUid())&&!RequestContext.getCurrentUser().getUid().equals(lure.getCreatorUid())){
+                vo.setShowQuit(Boolean.TRUE);
             }
         }
         if(vo.getStateDesc().equals("进行中")&&!lure.getParticipantUid().contains(RequestContext.getCurrentUser().getUid())){
