@@ -372,7 +372,7 @@
         WHERE id=#{id}
     </select>
 
-    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT
         <include refid="Base_Column_List"/>
         FROM
@@ -575,6 +575,12 @@
             </if>
             <if test="uid != null and uid != ''">
                 `uid`=#{uid},
+            </if>
+            <if test="state != null">
+                `state`=#{state},
+            </if>
+            <if test="traceId != null and traceId != ''">
+                `trace_id`=#{traceId},
             </if>
         </set>
         WHERE id=#{id}

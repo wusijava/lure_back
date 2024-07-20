@@ -306,7 +306,8 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
                 rate.add(mr);
             }
             paiHang.setDesc(getFishDesc(rate));
-            paiHang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
+            User user=users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0);
+            paiHang.setImg(user.getImgState()==1?user.getImg():"https://www.picture.lureking.cn/temp/1/89jng2.jpg");
             data.add(paiHang);
         }
         data.sort(Comparator.comparing(PaiHang::getNum).reversed());
@@ -363,7 +364,9 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
             }
             wang.setRate(BigDecimal.valueOf(rateWang.stream().filter(w -> w.getGetFish() == 0).count()).divide(BigDecimal.valueOf(rateWang.stream().map(w -> w.getDay()).distinct().collect(Collectors.toList()).size()), 4, BigDecimal.ROUND_HALF_UP));
             wang.setName(name);
-            wang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
+            User user=users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0);
+            wang.setImg(user.getImgState()==1?user.getImg():"https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+            //wang.setImg(users.stream().filter(w->w.getUid().equals(collect1.get(0).getUid())).collect(Collectors.toList()).get(0).getImg());
             if(wang.getRate().compareTo(new BigDecimal(0)) == 1){
                 list.add(wang);
             }

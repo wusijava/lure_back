@@ -18,4 +18,7 @@ public class LureShopping implements Identifiable<Long> {
   private String uid;
   private String userName;
   private Integer recommend;
+  private Integer state;
+  private String traceId;
+
 }

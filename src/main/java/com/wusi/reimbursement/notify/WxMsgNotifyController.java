@@ -2,7 +2,11 @@ package com.wusi.reimbursement.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wusi.reimbursement.entity.LureFishGet;
+import com.wusi.reimbursement.entity.LureShopping;
+import com.wusi.reimbursement.entity.User;
 import com.wusi.reimbursement.service.LureFishGetService;
+import com.wusi.reimbursement.service.LureShoppingService;
+import com.wusi.reimbursement.service.UserService;
 import com.wusi.reimbursement.utils.DataUtil;
 import com.wusi.reimbursement.utils.WXBizMsgCrypt;
 import com.wusi.reimbursement.wx.dto.ImgResult;
@@ -29,17 +33,22 @@ import static java.lang.System.out;
 public class WxMsgNotifyController {
     @Autowired
     private LureFishGetService lureFishGetService;
+    @Autowired
+    private LureShoppingService lureShoppingService;
+    @Autowired
+    private UserService userService;
 
     @RequestMapping(value = "wxMsg")
     @ResponseBody
     private void wxMsgNotify(HttpServletRequest request,
                              HttpServletResponse response){
         try {
+            Thread.sleep(5000);
             // 微信服务器POST消息时用的是UTF-8编码，在接收时也要用同样的编码，否则中文会乱码；
             request.setCharacterEncoding("UTF-8");
             response.setCharacterEncoding("UTF-8");
             boolean isGet = request.getMethod().toLowerCase().equals("get");
-            log.error("消息与时间接口收到请求，请求方式：" + (isGet ? "GET" : "POST"));
+            log.error("收到微信回调，请求方式：" + (isGet ? "GET" : "POST"));
             if (isGet) {
                 // 微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。
                 String signature = request.getParameter("signature");
@@ -83,14 +92,38 @@ public class WxMsgNotifyController {
                 log.error("微信回调内容"+jmResult);
                 ImgResult imgResult = JSONObject.parseObject(jmResult, ImgResult.class);
                 LureFishGet fishGet = lureFishGetService.selectByTraceId(imgResult.getTrace_id());
-                if(DataUtil.isNotEmpty(fishGet)&&fishGet.getState().equals(0)){
+                if(DataUtil.isNotEmpty(fishGet)){
                     if(!imgResult.getResult().getSuggest().equals("pass")){
                         fishGet.setState(-1);
                         lureFishGetService.updateById(fishGet);
+                    }else if(imgResult.getResult().getSuggest().equals("pass")){
+                        fishGet.setState(1);
+                        lureFishGetService.updateById(fishGet);
+                    }
+                }else{
+                    LureShopping lureShopping = lureShoppingService.selectByTraceId(imgResult.getTrace_id());
+                    if(DataUtil.isNotEmpty(lureShopping)){
+                        if(!imgResult.getResult().getSuggest().equals("pass")){
+                            lureShopping.setState(-1);
+                            lureShoppingService.updateById(lureShopping);
+                        }else if(imgResult.getResult().getSuggest().equals("pass")){
+                            lureShopping.setState(1);
+                            lureShoppingService.updateById(lureShopping);
+                        }
+                    }else{
+                        User user = userService.selectByTraceId(imgResult.getTrace_id());
+                        if(DataUtil.isEmpty(user)){
+                            return;
+                        }
+                        if(!imgResult.getResult().getSuggest().equals("pass")){
+                            user.setImgState(-1);
+                            userService.updateById(user);
+                        }else if(imgResult.getResult().getSuggest().equals("pass")){
+                            user.setImgState(1);
+                            userService.updateById(user);
+                        }
                     }
                 }
-
-
             }
         } catch (Exception e) {
             e.printStackTrace();

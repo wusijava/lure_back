@@ -91,7 +91,11 @@ public class MyUserPermissionResolver extends UserPermissionResolver {
             loginUser.setStoreMarkCode(user.getStoreMarkCode());
             loginUser.setCityCode(user.getCityCode());
             loginUser.setProvinceCode(user.getProvinceCode());
-            loginUser.setImg(user.getImg());
+            if(user.getImgState().equals(1)){
+                loginUser.setImg(user.getImg());
+            }else{
+                loginUser.setImg("https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+            }
             return loginUser;
         } else {
             return null;

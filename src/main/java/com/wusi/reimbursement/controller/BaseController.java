@@ -13,9 +13,12 @@ import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.HomeMenuList;
 import com.wusi.reimbursement.vo.ReimbursementList;
 import com.wusi.reimbursement.vo.UserInfo;
+import com.wusi.reimbursement.wx.dto.MsgApi;
+import com.wusi.reimbursement.wx.impl.WxApiImpl;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -42,6 +45,7 @@ import java.util.Map;
  * @ CreateDate    :  2020/1/7$ 11:25$
  */
 @RestController
+@Slf4j
 public class BaseController {
     @Autowired
     private RoleService roleService;
@@ -51,6 +55,8 @@ public class BaseController {
     private ReimbursementService reimbursementService;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private WxApiImpl wxApi;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
@@ -222,7 +228,7 @@ public class BaseController {
     @RequestMapping(value = "/api/web/user/changePassword", method = RequestMethod.POST)
     @ResponseBody
     @SysLog("修改密码")
-    public Response changePassword(String oldPassword, String newPassword, String nickName, String url) {
+    public Response changePassword(String oldPassword, String newPassword, String nickName, String url,String wxRemarkCode,String wxImgCode) {
         if(DataUtil.isEmpty(oldPassword)&&DataUtil.isEmpty(newPassword)&&DataUtil.isEmpty(nickName)&&DataUtil.isEmpty(url)){
             return Response.fail("至少需要修改一项!");
         }
@@ -231,8 +237,25 @@ public class BaseController {
                 return Response.fail("密码不能含有中文字符!");
             }
         }
+        String traceId="";
+        if(DataUtil.isNotEmpty(wxImgCode)){
+            if(DataUtil.isNotEmpty(nickName)){
+                MsgApi s = wxApi.checkMsg(nickName+newPassword+oldPassword, 2,wxRemarkCode);
+                log.error("修改密码信息鉴别返回，{}", s);
+                log.error("修改密码鉴别返回，{}", s.getResult().getSuggest());
+                if(!s.getResult().getSuggest().equals("pass")){
+                    return Response.fail("文字包含敏感字符，请修改！");
+                }
+                if(DataUtil.isNotEmpty(url)&&DataUtil.isNotEmpty(wxImgCode)){
+                    MsgApi imgREsult = wxApi.checkImg(url, 1,wxImgCode);
+                    if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
+                        traceId=  imgREsult.getTrace_id();
+                    }
+                }
+            }
+        }
         RequestContext.RequestUser user = RequestContext.getCurrentUser();
-        String result = userService.changePassword(Long.valueOf(user.getId()), user.getSalt(), user.getPassword(), oldPassword, newPassword, nickName, url);
+        String result = userService.changePassword(Long.valueOf(user.getId()), user.getSalt(), user.getPassword(), oldPassword, newPassword, nickName, url,traceId);
         if (result != null) {
             return Response.fail(result);
         }

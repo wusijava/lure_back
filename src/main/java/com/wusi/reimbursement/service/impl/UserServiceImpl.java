@@ -46,12 +46,16 @@ public class UserServiceImpl extends BaseMybatisServiceImpl<User,Long> implement
 
     @Override
     public User findByUid(String uid) {
-        return userMapper.findByUid(uid);
+        User user=userMapper.findByUid(uid);
+        if(DataUtil.isNotEmpty(user)&&user.getImgState().equals(0)){
+            user.setImg("https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+        }
+        return user;
     }
 
     @Override
     @Transactional(rollbackFor =Exception.class)
-    public String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword,String nickName,String url) {
+    public String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword,String nickName,String url,String traceId) {
         Integer updateFlag =0;
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         UserQuery query = new UserQuery();
@@ -80,6 +84,8 @@ public class UserServiceImpl extends BaseMybatisServiceImpl<User,Long> implement
         query.setId(userId);
         if(DataUtil.isNotEmpty(url)){
             query.setImg(url);
+            query.setImgState(0);
+            query.setTraceId(traceId);
             updateFlag++;
         }
         if(updateFlag > 0){
@@ -146,5 +152,13 @@ public class UserServiceImpl extends BaseMybatisServiceImpl<User,Long> implement
     @Override
     public User queryRepeateUser(Long id, String nickName) {
         return userMapper.queryRepeateUser(id,nickName);
+    }
+
+    @Override
+    public User selectByTraceId(String traceId) {
+        if(DataUtil.isEmpty(traceId)){
+            return null;
+        }
+        return userMapper.selectByTraceId(traceId);
     }
 }

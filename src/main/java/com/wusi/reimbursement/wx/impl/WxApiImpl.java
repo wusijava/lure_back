@@ -12,12 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 描述
- * @Author duchong
- * @Date 2023/1/3 14:00
- * @Version 1.0.0
- **/
+
 @Component
 public class WxApiImpl implements WxApi {
 

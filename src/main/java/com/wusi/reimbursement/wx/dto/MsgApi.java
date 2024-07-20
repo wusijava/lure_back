@@ -2,6 +2,8 @@ package com.wusi.reimbursement.wx.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class MsgApi {
     private String errcode;
@@ -10,7 +12,7 @@ public class MsgApi {
 
     private Result result;
 
-    //private Detail detail;
+    private List<Detail> detail;
 
     private String trace_id;
 }

@@ -14,4 +14,6 @@ public interface LureShoppingMapper extends BaseMapper<LureShopping,Long> {
 
 
     void updateNickName(@Param("nickName") String nickName, @Param("newNickName") String newNickName);
+
+    LureShopping selectByTraceId(String traceId);
 }

@@ -34,7 +34,7 @@ public interface UserService extends BaseService<User,Long> {
      * @param newPassword
      * @@return
      */
-    String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword,String nickName,String url);
+    String changePassword(Long userId, String salt, String password, String oldPassword, String newPassword,String nickName,String url,String traceId);
 
     /**
      * 修改密码
@@ -60,4 +60,6 @@ public interface UserService extends BaseService<User,Long> {
     List<User> queryByUidList(List<String> uid);
 
     User queryRepeateUser(Long id,String nickName);
+
+    User selectByTraceId(String traceId);
 }

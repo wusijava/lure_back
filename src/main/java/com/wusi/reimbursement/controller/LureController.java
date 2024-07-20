@@ -1,4 +1,4 @@
-package com.wusi.reimbursement.controller;
+ package com.wusi.reimbursement.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.wusi.reimbursement.aop.SysLog;
@@ -77,12 +77,28 @@ public class LureController {
     @ResponseBody
     @SysLog("保存路亚消费项")
     @RateLimit(permitsPerSecond = 0.2, ipLimit = true, description = "限制增加频率")
-    public Response<String> save(LureShopping spendList) throws Exception {
+    public Response<String> save(LureShoppingQuery spendList) throws Exception {
+        String traceId="";
+        if(DataUtil.isNotEmpty(spendList.getWxRemarkCode())){
+            MsgApi s = wxApi.checkMsg(spendList.getRemark()+spendList.getItem(), 2,spendList.getWxRemarkCode());
+            log.error("消费信息鉴别返回，{}", s);
+            log.error("消费信息鉴别返回，{}", s.getResult().getSuggest());
+            if(!s.getResult().getSuggest().equals("pass")){
+                return Response.fail("文字包含敏感字符，请修改！");
+            }
+            if(DataUtil.isNotEmpty(spendList.getUrl())&&DataUtil.isNotEmpty(spendList.getWxImgCode())){
+                MsgApi imgREsult = wxApi.checkImg(spendList.getUrl(), 1,spendList.getWxImgCode());
+                if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
+                    traceId=  imgREsult.getTrace_id();
+                }
+            }
+        }
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
         if (!StringUtils.isNumeric(spendList.getPrice())) {
             return Response.fail("金额填数字,你个憨批~");
         }
         LureShopping shopping = getSpend(spendList, loginUser);
+        shopping.setTraceId(traceId);
         lureShoppingService.insert(shopping);
         SendMessage.sendMessage(JmsMessaging.IMG_BACK_MESSAGE, toJSONString(shopping));
         return Response.ok("路亚毁一生!");
@@ -99,6 +115,7 @@ public class LureController {
         spend.setUid(user.getUid());
         spend.setUserName(user.getNickName());
         spend.setRecommend(spendList.getRecommend());
+        spend.setState(0);
         return spend;
     }
 
@@ -160,7 +177,13 @@ public class LureController {
     private SpendList getLureList(LureShopping lure) {
         SpendList vo = new SpendList();
         vo.setRemark(lure.getRemark());
-        vo.setUrl(lure.getUrl());
+        if(lure.getState().equals(1)){
+            vo.setUrl(lure.getUrl());
+        }else if(lure.getState().equals(0)){
+            vo.setUrl("https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+        }else if(lure.getState().equals(-1)){
+            vo.setUrl("https://www.picture.lureking.cn/temp/1/309b6n.jpg");
+        }
         vo.setItem(lure.getItem());
         vo.setDate(sdf.format(lure.getDate()));
         vo.setPrice(lure.getPrice());
@@ -254,17 +277,21 @@ public class LureController {
     @SysLog("保存中鱼或打龟数据")
     @RateLimit(permitsPerSecond = 0.2, ipLimit = true, description = "限制频率")
     public Response<String> saveFish(SaveFish saveFish) throws Exception {
+        log.error("中鱼获打龟入参，{}",saveFish);
         String traceId="";
         if(DataUtil.isNotEmpty(saveFish.getWxRemarkCode())){
-            MsgApi s = wxApi.checkMsg(saveFish.getRemark(), 1,saveFish.getWxRemarkCode());
-            if(!s.getResult().getSuggest().equals("pass")){
-                return Response.fail("文字包含敏感字符，请修改！");
+            if(DataUtil.isNotEmpty(saveFish.getRemark())){
+                MsgApi s = wxApi.checkMsg(saveFish.getRemark(), 2,saveFish.getWxRemarkCode());
+                log.error("鉴别信息返回:{}", JSONObject.toJSONString(s));
+                if(DataUtil.isNotEmpty(s)&&(!"pass".equals(s.getResult().getSuggest()))){
+                    return Response.fail("文字包含敏感字符，请修改！");
+                }
             }
             if(DataUtil.isNotEmpty(saveFish.getUrl())&&DataUtil.isNotEmpty(saveFish.getWxImgCode())){
                 MsgApi imgREsult = wxApi.checkImg(saveFish.getUrl(), 1,saveFish.getWxImgCode());
-                if(!imgREsult.getErrmsg().equals("ok")){
+               /* if(!imgREsult.getErrmsg().equals("ok")){
                     return Response.fail("图片包含敏感内容，请修改！");
-                }
+                }*/
                 if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
                     traceId=  imgREsult.getTrace_id();
                 }
@@ -384,7 +411,6 @@ public class LureController {
         if (DataUtil.isEmpty(query.getLimit())) {
             query.setLimit(10);
         }
-        query.setState(1);
         query.setUid(RequestContext.getCurrentUser().getUid());
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
@@ -403,12 +429,18 @@ public class LureController {
         vo.setLure(lure.getLure());
         vo.setTmp(lure.getTmpMin() + "℃-" + lure.getTmpMax() + "℃");
         vo.setId(lure.getId());
-        vo.setImageUrl(DataUtil.isEmpty(lure.getImageUrl()) ? "http://www.picture.lureking.cn/temp/1/v4zz82.jpg" : lure.getImageUrl());
+        if(lure.getState().equals(1)){
+            vo.setImageUrl(DataUtil.isEmpty(lure.getImageUrl()) ? "http://www.picture.lureking.cn/temp/1/v4zz82.jpg" : lure.getImageUrl());
+        }else if(lure.getState().equals(0)){
+            vo.setImageUrl("https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+        }else if(lure.getState().equals(-1)){
+            vo.setImageUrl("https://www.picture.lureking.cn/temp/1/309b6n.jpg");
+        }
         vo.setPres(lure.getPres() + "hPa");
         vo.setCond(lure.getCondTxtDay() + "-" + lure.getCondTxtNight());
         vo.setCreateTime(sdf.format(lure.getCreateTime()));
         vo.setRemark(DataUtil.isEmpty(lure.getRemark()) ? "无备注" : lure.getRemark());
-        vo.setAddress(DataUtil.isEmpty(lure.getAddress()) ? "大师不愿意透露地址" : lure.getAddress());
+        vo.setAddress(DataUtil.isEmpty(lure.getAddress()) ? "未记录地址" : lure.getAddress());
         vo.setLength(lure.getLength() + "cm");
         String str = sdf2.format(lure.getCreateTime());
         ShuiWenWaterLevel level = shuiWenWaterLevelService.queryByDate(str);
@@ -491,6 +523,7 @@ public class LureController {
         }
         //query.setNotUid((RequestContext.getCurrentUser().getUid()));
         query.setIsRepeat(LureFishGet.IsRepeat.no.getCode());
+        query.setState(1);
         Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
         Page<LureFishGet> page = lureFishGetService.queryPage(query, pageable);
         List<LureFishGet> list = page.getContent();
@@ -510,7 +543,13 @@ public class LureController {
         share.setKind(lure.getFishKind());
         share.setLure(lure.getLure());
         share.setSize(lure.getLength() + "厘米-" + lure.getWeight() + "斤");
-        share.setUrl(lure.getImageUrl());
+        if(lure.getState().equals(1)){
+            share.setUrl(DataUtil.isEmpty(lure.getImageUrl()) ? "http://www.picture.lureking.cn/temp/1/v4zz82.jpg" : lure.getImageUrl());
+        }else if(lure.getState().equals(0)){
+            share.setUrl("https://www.picture.lureking.cn/temp/1/89jng2.jpg");
+        }else if(lure.getState().equals(-1)){
+            share.setUrl("https://www.picture.lureking.cn/temp/1/309b6n.jpg");
+        }
         share.setName(lure.getUserName());
         share.setUse(lure.getUse() == 2 ? "放流" : "放油");
         if (DataUtil.isNotEmpty(lure.getProvince())) {
@@ -526,7 +565,7 @@ public class LureController {
         } else {
             share.setTime(days + "天前");
         }
-        share.setImg(users.stream().filter(w -> w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg());
+        share.setImg(users.stream().filter(w -> w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImgState()==1?users.stream().filter(w -> w.getUid().equals(lure.getUid())).collect(Collectors.toList()).get(0).getImg():"https://www.picture.lureking.cn/temp/1/89jng2.jpg");
         share.setComment(fishCommentService.queryComment(lure.getId()));
         share.setZan(fishCommentService.queryZan(lure.getId()));
         share.setIsZan(share.getZan().contains(RequestContext.getCurrentUser().getNickName()));
@@ -667,7 +706,8 @@ public class LureController {
             return Response.fail("评论不能为空!");
         }
         if(DataUtil.isNotEmpty(wxCode)){
-            MsgApi s = wxApi.checkMsg(comment, 1,wxCode);
+            MsgApi s = wxApi.checkMsg(comment, 2,wxCode);
+            log.error("评论鉴别信息返回:{}", JSONObject.toJSONString(s));
             if(!s.getResult().getSuggest().equals("pass")){
                 return Response.fail("包含敏感字符，请修改！");
             }
@@ -736,7 +776,8 @@ public class LureController {
     @SysLog("创建集体活动")
     public Response<String> createCollectivityLure(CreateCollectivity data) {
         if(DataUtil.isNotEmpty(data.getWxCode())){
-            MsgApi s = wxApi.checkMsg(data.getRemark()+data.getActivityName()+data.getAddress()+data.getSlogan(), 1,data.getWxCode());
+            MsgApi s = wxApi.checkMsg(data.getRemark()+data.getActivityName()+data.getAddress()+data.getSlogan(), 2,data.getWxCode());
+            log.error("创建集体活动鉴别信息返回:{}", JSONObject.toJSONString(s));
             if(!s.getResult().getSuggest().equals("pass")){
                 return Response.fail("包含敏感字符，请修改！");
             }

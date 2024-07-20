@@ -18,6 +18,8 @@
             <result column="remark" property="remark" jdbcType="VARCHAR"/>
             <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
             <result column="img" property="img" jdbcType="VARCHAR"/>
+            <result column="trace_id" property="traceId" jdbcType="VARCHAR"/>
+            <result column="img_state" property="imgState" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="table">user</sql>
@@ -37,7 +39,9 @@
             `province_code`,
             `remark`,
             create_time,
-            img
+            img,
+            img_state,
+            trace_id
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -90,6 +94,12 @@
                     <if test="img != null and img != ''">
                         AND `img`=#{img}
                     </if>
+                    <if test="imgState != null">
+                        AND `img_state`=#{imgState}
+                    </if>
+                    <if test="traceId != null and traceId != ''">
+                        AND `trace_id`=#{traceId}
+                    </if>
             </trim>
         </where>
         <if test="offset == null and limit != null">
@@ -137,7 +147,9 @@
             `province_code`,
             `remark`,
             create_time,
-            img
+            img,
+            img_state,
+            trace_id
         )
         VALUES(
             #{id},
@@ -155,7 +167,9 @@
             #{provinceCode},
             #{remark},
             #{createTime},
-            #{img}
+            #{img},
+            #{imgState},
+            #{traceId}
         )
     </insert>
 
@@ -177,7 +191,9 @@
             `city_code`,
             `province_code`,
             `remark`,
-            img
+                img,
+            img_state,
+            trace_id
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
@@ -196,7 +212,9 @@
             #{cm.cityCode},
             #{cm.provinceCode},
             #{cm.remark},
-            #{cm.img}
+            #{cm.img},
+            #{cm.imgState},
+            #{cm.traceId}
             )
         </foreach>
     </insert>
@@ -269,6 +287,12 @@
             <if test="img != null and img != ''">
                 `img`=#{img},
             </if>
+            <if test="imgState != null">
+                `img_state`=#{imgState},
+            </if>
+            <if test="traceId != null and traceId != ''">
+                `trace_id`=#{traceId},
+            </if>
         </set>
         WHERE id=#{id}
     </update>
@@ -293,5 +317,14 @@
         FROM
         <include refid="table"/>
         where nick_name = #{nickName} and id != #{id}
+    </select>
+
+
+    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE trace_id=#{traceId} limit 1
     </select>
 </mapper>

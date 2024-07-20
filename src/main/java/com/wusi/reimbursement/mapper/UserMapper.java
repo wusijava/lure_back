@@ -31,4 +31,6 @@ public interface UserMapper extends BaseMapper<User,Long> {
     List<User> queryByUidList(@Param("uid") List<String> uid);
 
     User queryRepeateUser(@Param("id") Long id, @Param("nickName") String nickName);
+
+    User selectByTraceId(String traceId);
 }

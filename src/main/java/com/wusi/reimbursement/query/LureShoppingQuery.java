@@ -18,4 +18,7 @@ public class LureShoppingQuery extends LureShopping {
     private String startTime;
 
     private String endTime;
+
+    private String wxRemarkCode;
+    private String wxImgCode;
 }

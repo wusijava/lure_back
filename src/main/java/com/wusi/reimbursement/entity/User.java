@@ -91,6 +91,11 @@ public class User implements Identifiable<Long> {
     public void setCode(Integer code) {
       this.code = code;
     }
+
+
   }
+  private Integer imgState;
+
+  private String traceId;
 
 }

@@ -11,6 +11,8 @@
             <result column="uid" property="uid" jdbcType="VARCHAR"/>
             <result column="user_name" property="userName" jdbcType="VARCHAR"/>
             <result column="recommend" property="recommend" jdbcType="INTEGER"/>
+            <result column="trace_id" property="traceId" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="table">lure_shopping</sql>
@@ -23,7 +25,9 @@
             `url`,
             `uid`,
             `user_name`,
-            `recommend`
+            `recommend`,
+            trace_id,
+            state
     </sql>
     <sql id="Base_Where_Clause">
         <where>
@@ -55,6 +59,12 @@
                     <if test="recommend != null">
                         AND `recommend`=#{recommend}
                     </if>
+                <if test="traceId != null and traceId != ''">
+                    AND `trace_id`=#{traceId}
+                </if>
+                <if test="state != null ">
+                    AND `state`=#{state}
+                </if>
             </trim>
         </where>
         order by date desc
@@ -96,7 +106,9 @@
             `url`,
             `uid`,
             `user_name`,
-            `recommend`
+            `recommend`,
+            trace_id,
+            state
         )
         VALUES(
             #{id},
@@ -107,7 +119,9 @@
             #{url},
             #{uid},
             #{userName},
-            #{recommend}
+            #{recommend},
+            #{traceId},
+            #{state}
         )
     </insert>
 
@@ -123,7 +137,9 @@
             `url`,
             `uid`,
             `user_name`,
-            `recommend`
+            `recommend`,
+            trace_id,
+            state
         )
         VALUES
         <foreach collection="list" item="cm" index="index" separator=",">
@@ -136,7 +152,9 @@
             #{cm.url},
             #{cm.uid},
             #{cm.userName},
-            #{cm.recommend}
+            #{cm.recommend},
+            #{cm.traceId},
+            #{cm.state}
             )
         </foreach>
     </insert>
@@ -177,6 +195,12 @@
             <if test="recommend != null">
                  `recommend`=#{recommend},
             </if>
+            <if test="state != null">
+                `state`=#{state},
+            </if>
+            <if test="traceId != null and traceId != ''">
+                `trace_id`=#{traceId},
+            </if>
         </set>
         WHERE id=#{id}
     </update>
@@ -191,4 +215,11 @@
         WHERE
         id=#{id}
     </delete>
+    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE trace_id=#{traceId} limit 1
+    </select>
 </mapper>
