@@ -590,7 +590,11 @@
         <include refid="table"/>
         set user_name=#{newNickName} where user_name=#{nickName}
     </update>
-
+    <update id="updateStateByTraceId">
+        UPDATE
+        <include refid="table"/>
+        set state=#{state} where trace_id=#{traceId}
+    </update>
     <delete id="deleteById">
         delete from
         <include refid="table"/>

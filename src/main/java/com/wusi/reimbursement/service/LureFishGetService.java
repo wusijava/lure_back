@@ -54,4 +54,6 @@ public interface LureFishGetService extends BaseService<LureFishGet,Long> {
 
     LureFishGet selectByTraceId(String traceId);
 
+    void updateStateByTraceId(Integer state,String traceId);
+
 }

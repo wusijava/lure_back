@@ -543,4 +543,12 @@ public class LureFishGetServiceImpl extends BaseMybatisServiceImpl<LureFishGet, 
         }
         return lureFishGetMapper.selectByTraceId(traceId);
     }
+
+    @Override
+    public void updateStateByTraceId(Integer state,String traceId) {
+        if(DataUtil.isEmpty(traceId)||DataUtil.isEmpty(state)){
+            return ;
+        }
+        lureFishGetMapper.updateStateByTraceId(state,traceId);
+    }
 }

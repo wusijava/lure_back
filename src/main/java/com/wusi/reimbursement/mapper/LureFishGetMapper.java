@@ -39,4 +39,6 @@ public interface LureFishGetMapper extends BaseMapper<LureFishGet,Long> {
     List<MonthRate> queryByDateAndUidList(String day, List<String> uids);
 
     LureFishGet selectByTraceId(String traceId);
+
+    void updateStateByTraceId(@Param("state") Integer state,@Param("traceId") String traceId);
 }

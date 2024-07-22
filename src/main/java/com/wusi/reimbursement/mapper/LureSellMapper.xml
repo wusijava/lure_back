@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.LureSellMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.LureSell">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="product_name" property="productName" jdbcType="VARCHAR"/>
+            <result column="buy_price" property="buyPrice" jdbcType="VARCHAR"/>
+            <result column="sell_price" property="sellPrice" jdbcType="VARCHAR"/>
+            <result column="buy_date" property="buyDate" jdbcType="TIMESTAMP"/>
+            <result column="sell_date" property="sellDate" jdbcType="TIMESTAMP"/>
+            <result column="freight" property="freight" jdbcType="VARCHAR"/>
+            <result column="profit" property="profit" jdbcType="VARCHAR"/>
+            <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+            <result column="buy_img" property="buyImg" jdbcType="VARCHAR"/>
+            <result column="sell_img" property="sellImg" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+            <result column="uid" property="uid" jdbcType="VARCHAR"/>
+            <result column="refund" property="refund" jdbcType="VARCHAR"/>
+            <result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">lure_sell</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `product_name`,
+            `buy_price`,
+            `sell_price`,
+            `buy_date`,
+            `sell_date`,
+            `freight`,
+            `profit`,
+            `create_date`,
+            `buy_img`,
+            `sell_img`,
+            `state`,
+            `uid`,
+            `refund`,
+            `remark`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="productName != null and productName != ''">
+                        AND `product_name`=#{productName}
+                    </if>
+                    <if test="buyPrice != null and buyPrice != ''">
+                        AND `buy_price`=#{buyPrice}
+                    </if>
+                    <if test="sellPrice != null and sellPrice != ''">
+                        AND `sell_price`=#{sellPrice}
+                    </if>
+                    <if test="buyDate != null">
+                        AND `buy_date`=#{buyDate}
+                    </if>
+                    <if test="sellDate != null">
+                        AND `sell_date`=#{sellDate}
+                    </if>
+                    <if test="freight != null and freight != ''">
+                        AND `freight`=#{freight}
+                    </if>
+                    <if test="profit != null and profit != ''">
+                        AND `profit`=#{profit}
+                    </if>
+                    <if test="createDate != null">
+                        AND `create_date`=#{createDate}
+                    </if>
+                    <if test="buyImg != null and buyImg != ''">
+                        AND `buy_img`=#{buyImg}
+                    </if>
+                    <if test="sellImg != null and sellImg != ''">
+                        AND `sell_img`=#{sellImg}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="uid != null and uid != ''">
+                        AND `uid`=#{uid}
+                    </if>
+                    <if test="refund != null and refund != ''">
+                        AND `refund`=#{refund}
+                    </if>
+                    <if test="remark != null and remark != ''">
+                        AND `remark`=#{remark}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.LureSell" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `product_name`,
+            `buy_price`,
+            `sell_price`,
+            `buy_date`,
+            `sell_date`,
+            `freight`,
+            `profit`,
+            `create_date`,
+            `buy_img`,
+            `sell_img`,
+            `state`,
+            `uid`,
+            `refund`,
+            `remark`
+        )
+        VALUES(
+            #{id},
+            #{productName},
+            #{buyPrice},
+            #{sellPrice},
+            #{buyDate},
+            #{sellDate},
+            #{freight},
+            #{profit},
+            #{createDate},
+            #{buyImg},
+            #{sellImg},
+            #{state},
+            #{uid},
+            #{refund},
+            #{remark}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `product_name`,
+            `buy_price`,
+            `sell_price`,
+            `buy_date`,
+            `sell_date`,
+            `freight`,
+            `profit`,
+            `create_date`,
+            `buy_img`,
+            `sell_img`,
+            `state`,
+            `uid`,
+            `refund`,
+            `remark`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.productName},
+            #{cm.buyPrice},
+            #{cm.sellPrice},
+            #{cm.buyDate},
+            #{cm.sellDate},
+            #{cm.freight},
+            #{cm.profit},
+            #{cm.createDate},
+            #{cm.buyImg},
+            #{cm.sellImg},
+            #{cm.state},
+            #{cm.uid},
+            #{cm.refund},
+            #{cm.remark}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.LureSell">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="productName != null and productName != ''">
+                 `product_name`=#{productName},
+            </if>
+            <if test="buyPrice != null and buyPrice != ''">
+                 `buy_price`=#{buyPrice},
+            </if>
+            <if test="sellPrice != null and sellPrice != ''">
+                 `sell_price`=#{sellPrice},
+            </if>
+            <if test="buyDate != null">
+                 `buy_date`=#{buyDate},
+            </if>
+            <if test="sellDate != null">
+                 `sell_date`=#{sellDate},
+            </if>
+            <if test="freight != null and freight != ''">
+                 `freight`=#{freight},
+            </if>
+            <if test="profit != null and profit != ''">
+                 `profit`=#{profit},
+            </if>
+            <if test="createDate != null">
+                 `create_date`=#{createDate},
+            </if>
+            <if test="buyImg != null and buyImg != ''">
+                 `buy_img`=#{buyImg},
+            </if>
+            <if test="sellImg != null and sellImg != ''">
+                 `sell_img`=#{sellImg},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="uid != null and uid != ''">
+                 `uid`=#{uid},
+            </if>
+            <if test="refund != null and refund != ''">
+                 `refund`=#{refund},
+            </if>
+            <if test="remark != null and remark != ''">
+                 `remark`=#{remark},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>

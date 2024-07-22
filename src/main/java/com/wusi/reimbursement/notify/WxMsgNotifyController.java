@@ -94,11 +94,9 @@ public class WxMsgNotifyController {
                 LureFishGet fishGet = lureFishGetService.selectByTraceId(imgResult.getTrace_id());
                 if(DataUtil.isNotEmpty(fishGet)){
                     if(!imgResult.getResult().getSuggest().equals("pass")){
-                        fishGet.setState(-1);
-                        lureFishGetService.updateById(fishGet);
+                        lureFishGetService.updateStateByTraceId(-1,imgResult.getTrace_id());
                     }else if(imgResult.getResult().getSuggest().equals("pass")){
-                        fishGet.setState(1);
-                        lureFishGetService.updateById(fishGet);
+                        lureFishGetService.updateStateByTraceId(1,imgResult.getTrace_id());
                     }
                 }else{
                     LureShopping lureShopping = lureShoppingService.selectByTraceId(imgResult.getTrace_id());

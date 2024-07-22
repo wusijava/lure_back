@@ -72,6 +72,8 @@ public class LureController {
     private CollectivityLureService collectivityLureService;
     @Autowired
     private WxApiImpl wxApi;
+    @Autowired
+    private LureSellService lureSellService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -99,6 +101,9 @@ public class LureController {
         }
         LureShopping shopping = getSpend(spendList, loginUser);
         shopping.setTraceId(traceId);
+        if(DataUtil.isEmpty(spendList.getWxRemarkCode())){
+            shopping.setState(1);
+        }
         lureShoppingService.insert(shopping);
         SendMessage.sendMessage(JmsMessaging.IMG_BACK_MESSAGE, toJSONString(shopping));
         return Response.ok("路亚毁一生!");
@@ -330,7 +335,7 @@ public class LureController {
         if(DataUtil.isNotEmpty(traceId)){
             data.setTraceId(traceId);
         }
-        if(DataUtil.isNotEmpty(saveFish.getUrl())){
+        if(DataUtil.isNotEmpty(saveFish.getWxRemarkCode())){
             data.setState(0);
         }else{
             data.setState(1);
@@ -901,6 +906,43 @@ public class LureController {
         collectivityLure.setState(-1);
         collectivityLureService.updateById(collectivityLure);
         return  Response.ok("关闭成功");
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "api/sellLure")
+    @SysLog("销售列表")
+    public Response<List<LureSellVo>> lureSellList(LureSellQuery query){
+        query.setUid(RequestContext.getCurrentUser().getUid());
+        List<LureSell> page = lureSellService.queryList(query);
+        List<LureSellVo> voList = new ArrayList<>();
+        for (LureSell lure : page) {
+            voList.add(getLureSellList(lure));
+        }
+        return Response.ok(voList);
+    }
+
+    private LureSellVo getLureSellList(LureSell lure) {
+        LureSellVo  vo=new LureSellVo();
+        vo.setId(lure.getId());
+        vo.setStateDesc(lure.getState()==0?"在售":"已售");
+        vo.setProductName(lure.getProductName()+"("+vo.getStateDesc()+")");
+        vo.setState(lure.getState());
+        vo.setBuyPrice(lure.getBuyPrice());
+        vo.setSellPrice(lure.getSellPrice()==null?"/":lure.getSellPrice());
+        vo.setBuyDate(format2.format(lure.getBuyDate()));
+        vo.setSellDate(lure.getSellDate()==null?"/":format2.format(lure.getSellDate()));
+        vo.setFreight(lure.getFreight()==null?"/":lure.getFreight());
+        vo.setProfit(lure.getProfit()==null?"/":lure.getProfit());
+        vo.setRemark(vo.getRemark()==null?"/": lure.getRemark());
+        vo.setRefund(vo.getRefund()==null?"/":lure.getRefund());
+        if(lure.getState()==1){
+            vo.setStoreDay(DateUtil.betweenDays(lure.getBuyDate(), lure.getSellDate()));
+        }else{
+            vo.setStoreDay(DateUtil.betweenDays(lure.getBuyDate(), new Date()));
+        }
+        vo.setBuyImg(lure.getBuyImg());
+        vo.setSellImg(lure.getSellImg());
+       return vo;
     }
 
 }
