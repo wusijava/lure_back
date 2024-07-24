@@ -2,10 +2,12 @@ package com.wusi.reimbursement.controller;
 
 import com.wusi.reimbursement.aop.SysLog;
 import com.wusi.reimbursement.common.Response;
+import com.wusi.reimbursement.entity.IllegalLog;
 import com.wusi.reimbursement.entity.Reimbursement;
 import com.wusi.reimbursement.entity.RequestContext;
 import com.wusi.reimbursement.entity.User;
 import com.wusi.reimbursement.query.ReimbursementQuery;
+import com.wusi.reimbursement.service.IllegalLogService;
 import com.wusi.reimbursement.service.ReimbursementService;
 import com.wusi.reimbursement.service.RoleService;
 import com.wusi.reimbursement.service.UserService;
@@ -57,6 +59,8 @@ public class BaseController {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private WxApiImpl wxApi;
+    @Autowired
+    private IllegalLogService illegalLogService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
@@ -244,6 +248,7 @@ public class BaseController {
                 log.error("修改密码信息鉴别返回，{}", s);
                 log.error("修改密码鉴别返回，{}", s.getResult().getSuggest());
                 if(!s.getResult().getSuggest().equals("pass")){
+                    illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), nickName+newPassword+oldPassword, -1,IllegalLog.Source.USERIMGAGE.getCode(),null,IllegalLog.Type.text.getCode(),s.getResult().getLabel());
                     return Response.fail("文字包含敏感字符，请修改！");
                 }
                 if(DataUtil.isNotEmpty(url)&&DataUtil.isNotEmpty(wxImgCode)){
@@ -251,6 +256,7 @@ public class BaseController {
                     if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
                         traceId=  imgREsult.getTrace_id();
                     }
+                    illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), url, 0,IllegalLog.Source.USERIMGAGE.getCode(),traceId,IllegalLog.Type.img.getCode(),100);
                 }
             }
         }

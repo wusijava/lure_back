@@ -1,9 +1,11 @@
 package com.wusi.reimbursement.notify;
 
 import com.alibaba.fastjson.JSONObject;
+import com.wusi.reimbursement.entity.IllegalLog;
 import com.wusi.reimbursement.entity.LureFishGet;
 import com.wusi.reimbursement.entity.LureShopping;
 import com.wusi.reimbursement.entity.User;
+import com.wusi.reimbursement.service.IllegalLogService;
 import com.wusi.reimbursement.service.LureFishGetService;
 import com.wusi.reimbursement.service.LureShoppingService;
 import com.wusi.reimbursement.service.UserService;
@@ -25,7 +27,6 @@ import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import static java.lang.System.out;
 
 @RestController
 @RequestMapping(value = "notify")
@@ -37,10 +38,12 @@ public class WxMsgNotifyController {
     private LureShoppingService lureShoppingService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private IllegalLogService illegalLogService;
 
     @RequestMapping(value = "wxMsg")
     @ResponseBody
-    private void wxMsgNotify(HttpServletRequest request,
+    public void wxMsgNotify(HttpServletRequest request,
                              HttpServletResponse response){
         try {
             Thread.sleep(5000);
@@ -49,6 +52,7 @@ public class WxMsgNotifyController {
             response.setCharacterEncoding("UTF-8");
             boolean isGet = request.getMethod().toLowerCase().equals("get");
             log.error("收到微信回调，请求方式：" + (isGet ? "GET" : "POST"));
+            PrintWriter out = null;
             if (isGet) {
                 // 微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。
                 String signature = request.getParameter("signature");
@@ -58,12 +62,12 @@ public class WxMsgNotifyController {
                 String nonce = request.getParameter("nonce");
                 // 随机字符串
                 String echostr = request.getParameter("echostr");
-                PrintWriter out = null;
                 out = response.getWriter();
                 if (CheckUtils.checkSignature(signature, timestamp, nonce)) {
                     out.print(echostr);
                     out.flush();
                 }
+                out.close();
             }else {
                 //先回复空字符串，然后执行自己的业务
                 this.output(response, "success");
@@ -91,42 +95,53 @@ public class WxMsgNotifyController {
                 String jmResult = pc.decrypt(encrypt);
                 log.error("微信回调内容"+jmResult);
                 ImgResult imgResult = JSONObject.parseObject(jmResult, ImgResult.class);
-                LureFishGet fishGet = lureFishGetService.selectByTraceId(imgResult.getTrace_id());
-                if(DataUtil.isNotEmpty(fishGet)){
-                    if(!imgResult.getResult().getSuggest().equals("pass")){
-                        lureFishGetService.updateStateByTraceId(-1,imgResult.getTrace_id());
-                    }else if(imgResult.getResult().getSuggest().equals("pass")){
-                        lureFishGetService.updateStateByTraceId(1,imgResult.getTrace_id());
-                    }
-                }else{
-                    LureShopping lureShopping = lureShoppingService.selectByTraceId(imgResult.getTrace_id());
-                    if(DataUtil.isNotEmpty(lureShopping)){
-                        if(!imgResult.getResult().getSuggest().equals("pass")){
-                            lureShopping.setState(-1);
-                            lureShoppingService.updateById(lureShopping);
-                        }else if(imgResult.getResult().getSuggest().equals("pass")){
-                            lureShopping.setState(1);
-                            lureShoppingService.updateById(lureShopping);
+
+                IllegalLog illegalLog = illegalLogService.selectByTraceId(imgResult.getTrace_id());
+                boolean boo=imgResult.getResult().getSuggest().equals("pass");
+                if(DataUtil.isNotEmpty(illegalLog)){
+                    if(illegalLog.getSource().equals(IllegalLog.Source.FISH.getCode())){
+                        LureFishGet fishGet = lureFishGetService.selectByTraceId(imgResult.getTrace_id());
+                        if(DataUtil.isNotEmpty(fishGet)){
+                            if(!boo){
+                                lureFishGetService.updateStateByTraceId(-1,imgResult.getTrace_id());
+                            }else{
+                                lureFishGetService.updateStateByTraceId(1,imgResult.getTrace_id());
+                            }
                         }
-                    }else{
+                    }else if(illegalLog.getSource().equals(IllegalLog.Source.SHOPPING.getCode())){
+                        LureShopping lureShopping = lureShoppingService.selectByTraceId(imgResult.getTrace_id());
+                        if(DataUtil.isNotEmpty(lureShopping)){
+                            if(!boo){
+                                lureShopping.setState(-1);
+                                lureShoppingService.updateById(lureShopping);
+                            }else{
+                                lureShopping.setState(1);
+                                lureShoppingService.updateById(lureShopping);
+                            }
+                        }
+                    }else if(illegalLog.getSource().equals(IllegalLog.Source.USERIMGAGE.getCode())){
                         User user = userService.selectByTraceId(imgResult.getTrace_id());
-                        if(DataUtil.isEmpty(user)){
-                            return;
-                        }
-                        if(!imgResult.getResult().getSuggest().equals("pass")){
-                            user.setImgState(-1);
-                            userService.updateById(user);
-                        }else if(imgResult.getResult().getSuggest().equals("pass")){
-                            user.setImgState(1);
-                            userService.updateById(user);
+                        if(DataUtil.isNotEmpty(user)){
+                            if(!boo){
+                                user.setImgState(-1);
+                                userService.updateById(user);
+                            }else{
+                                user.setImgState(1);
+                                userService.updateById(user);
+                            }
                         }
                     }
+                    if(boo){
+                        illegalLog.setState(1);
+                    }else{
+                        illegalLog.setState(-1);
+                        illegalLog.setReason(getReason(imgResult.getResult().getLabel()));
+                    }
+                    illegalLogService.updateById(illegalLog);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            out.close();
         }
 
     }
@@ -139,6 +154,33 @@ public class WxMsgNotifyController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getReason(Integer reason) {
+        switch (reason){
+            case 100:
+                return "正常";
+            case 10001:
+                return "广告";
+            case 20001:
+                return "时政";
+            case 20002:
+                return "色情";
+            case 20003:
+                return "辱骂";
+            case 20006:
+                return "违法犯罪";
+            case 20008:
+                return "欺诈";
+            case 20012:
+                return "低俗";
+            case 20013:
+                return "版权";
+            case 21000:
+                return "其他";
+        }
+        return "其他";
+
     }
 }
     class CheckUtils {

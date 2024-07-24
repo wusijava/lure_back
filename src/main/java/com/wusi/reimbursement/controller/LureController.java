@@ -14,7 +14,6 @@ import com.wusi.reimbursement.vo.*;
 import com.wusi.reimbursement.wx.dto.MsgApi;
 import com.wusi.reimbursement.wx.impl.WxApiImpl;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +73,8 @@ public class LureController {
     private WxApiImpl wxApi;
     @Autowired
     private LureSellService lureSellService;
+    @Autowired
+    private IllegalLogService illegalLogService;
 
     @RequestMapping(value = "api/saveLureSpend", method = RequestMethod.POST)
     @ResponseBody
@@ -86,6 +87,7 @@ public class LureController {
             log.error("消费信息鉴别返回，{}", s);
             log.error("消费信息鉴别返回，{}", s.getResult().getSuggest());
             if(!s.getResult().getSuggest().equals("pass")){
+                illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), spendList.getRemark()+spendList.getItem(), -1,IllegalLog.Source.SHOPPING.getCode(),null,IllegalLog.Type.text.getCode(),s.getResult().getLabel());
                 return Response.fail("文字包含敏感字符，请修改！");
             }
             if(DataUtil.isNotEmpty(spendList.getUrl())&&DataUtil.isNotEmpty(spendList.getWxImgCode())){
@@ -93,6 +95,7 @@ public class LureController {
                 if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
                     traceId=  imgREsult.getTrace_id();
                 }
+                illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), spendList.getUrl(), 0,IllegalLog.Source.SHOPPING.getCode(),traceId,IllegalLog.Type.img.getCode(),100);
             }
         }
         RequestContext.RequestUser loginUser = RequestContext.getCurrentUser();
@@ -289,17 +292,16 @@ public class LureController {
                 MsgApi s = wxApi.checkMsg(saveFish.getRemark(), 2,saveFish.getWxRemarkCode());
                 log.error("鉴别信息返回:{}", JSONObject.toJSONString(s));
                 if(DataUtil.isNotEmpty(s)&&(!"pass".equals(s.getResult().getSuggest()))){
+                    illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), saveFish.getRemark(), -1,IllegalLog.Source.FISH.getCode(),null,IllegalLog.Type.text.getCode(),s.getResult().getLabel());
                     return Response.fail("文字包含敏感字符，请修改！");
                 }
             }
             if(DataUtil.isNotEmpty(saveFish.getUrl())&&DataUtil.isNotEmpty(saveFish.getWxImgCode())){
                 MsgApi imgREsult = wxApi.checkImg(saveFish.getUrl(), 1,saveFish.getWxImgCode());
-               /* if(!imgREsult.getErrmsg().equals("ok")){
-                    return Response.fail("图片包含敏感内容，请修改！");
-                }*/
                 if(DataUtil.isNotEmpty(imgREsult.getTrace_id())){
                     traceId=  imgREsult.getTrace_id();
                 }
+                illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), saveFish.getUrl(), 0,IllegalLog.Source.FISH.getCode(),traceId,IllegalLog.Type.img.getCode(),100);
             }
         }
         Date date = saveFish.getDate() == null ? new Date() : new SimpleDateFormat("yyyy-MM-dd").parse(saveFish.getDate());
@@ -335,12 +337,15 @@ public class LureController {
         if(DataUtil.isNotEmpty(traceId)){
             data.setTraceId(traceId);
         }
+        data.setGetFish((DataUtil.isNotEmpty(saveFish.getGetFish()) && saveFish.getGetFish() == 0) ? 0 : 1);
         if(DataUtil.isNotEmpty(saveFish.getWxRemarkCode())){
             data.setState(0);
         }else{
             data.setState(1);
         }
-        data.setGetFish((DataUtil.isNotEmpty(saveFish.getGetFish()) && saveFish.getGetFish() == 0) ? 0 : 1);
+        if(DataUtil.isEmpty(saveFish.getUrl())){
+            data.setState(1);
+        }
         if (DataUtil.isNotEmpty(weather)) {
             data.setCondTxtDay(weather.getCondTxtDay());
             data.setCondTxtNight(weather.getCondTxtNight());
@@ -714,6 +719,7 @@ public class LureController {
             MsgApi s = wxApi.checkMsg(comment, 2,wxCode);
             log.error("评论鉴别信息返回:{}", JSONObject.toJSONString(s));
             if(!s.getResult().getSuggest().equals("pass")){
+                illegalLogService.saveIllegalLog(RequestContext.getCurrentUser().getUid(), RequestContext.getCurrentUser().getNickName(), comment, -1,IllegalLog.Source.COMMENT.getCode(),null,IllegalLog.Type.text.getCode(),s.getResult().getLabel());
                 return Response.fail("包含敏感字符，请修改！");
             }
         }
@@ -945,4 +951,28 @@ public class LureController {
        return vo;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "api/illegalLog")
+    @SysLog("违规列表")
+    public Response<List<IllegalLogVo>> illegalLogList(IllegalLogQuery query){
+        query.setUid(RequestContext.getCurrentUser().getUid());
+        query.setState(-1);
+        List<IllegalLog> page = illegalLogService.queryList(query);
+        List<IllegalLogVo> voList = new ArrayList<>();
+        for (IllegalLog log : page) {
+            voList.add(getIllegalLog(log));
+        }
+        return Response.ok(voList);
+    }
+
+    private IllegalLogVo getIllegalLog(IllegalLog log) {
+        IllegalLogVo vo=new IllegalLogVo();
+        vo.setContent(log.getType().equals(IllegalLog.Type.text.getCode())?StringUtils.hiddenName(log.getContent()):"太污,不便展示");
+        vo.setCreateTime(format2.format(log.getCreateTime()));
+        vo.setReason(log.getReason());
+        vo.setTypeDesc(log.getTypeDesc());
+        vo.setUserName(log.getUserName());
+        vo.setSourceDesc(log.getSourceDesc());
+        return vo;
+    }
 }

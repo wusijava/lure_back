@@ -204,7 +204,7 @@
         </set>
         WHERE id=#{id}
     </update>
-    <update id="updateNickName">
+    <update id="updateNickName" parameterType="java.lang.String">
         UPDATE
         <include refid="table"/>
         set user_name=#{newNickName} where user_name=#{nickName}

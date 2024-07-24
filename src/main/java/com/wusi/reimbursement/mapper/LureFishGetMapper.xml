@@ -585,12 +585,12 @@
         </set>
         WHERE id=#{id}
     </update>
-    <update id="updateNickName">
+    <update id="updateNickName" parameterType="java.lang.String">
         UPDATE
         <include refid="table"/>
         set user_name=#{newNickName} where user_name=#{nickName}
     </update>
-    <update id="updateStateByTraceId">
+    <update id="updateStateByTraceId"  parameterType="com.wusi.reimbursement.entity.LureFishGet">
         UPDATE
         <include refid="table"/>
         set state=#{state} where trace_id=#{traceId}

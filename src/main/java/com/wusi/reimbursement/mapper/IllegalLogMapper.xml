@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wusi.reimbursement.mapper.IllegalLogMapper">
+    <resultMap id="BaseResultMap" type="com.wusi.reimbursement.entity.IllegalLog">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="uid" property="uid" jdbcType="VARCHAR"/>
+            <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+            <result column="content" property="content" jdbcType="VARCHAR"/>
+            <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="reason" property="reason" jdbcType="VARCHAR"/>
+            <result column="type" property="type" jdbcType="INTEGER"/>
+            <result column="source" property="source" jdbcType="INTEGER"/>
+            <result column="state" property="state" jdbcType="INTEGER"/>
+            <result column="trace_id" property="traceId" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table">illegal_log</sql>
+    <sql id="Base_Column_List">
+            `id`,
+            `uid`,
+            `user_name`,
+            `content`,
+            `create_time`,
+            `reason`,
+            `type`,
+            `source`,
+            `state`,
+            `trace_id`
+    </sql>
+    <sql id="Base_Where_Clause">
+        <where>
+            <trim prefixOverrides="and">
+                    <if test="id != null">
+                        AND `id`=#{id}
+                    </if>
+                    <if test="uid != null and uid != ''">
+                        AND `uid`=#{uid}
+                    </if>
+                    <if test="userName != null and userName != ''">
+                        AND `user_name`=#{userName}
+                    </if>
+                    <if test="content != null and content != ''">
+                        AND `content`=#{content}
+                    </if>
+                    <if test="createTime != null">
+                        AND `create_time`=#{createTime}
+                    </if>
+                    <if test="reason != null and reason != ''">
+                        AND `reason`=#{reason}
+                    </if>
+                    <if test="type != null">
+                        AND `type`=#{type}
+                    </if>
+                    <if test="source != null">
+                        AND `source`=#{source}
+                    </if>
+                    <if test="state != null">
+                        AND `state`=#{state}
+                    </if>
+                    <if test="traceId != null and traceId != ''">
+                        AND `trace_id`=#{traceId}
+                    </if>
+            </trim>
+        </where>
+        order by id desc
+        <if test="offset == null and limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </sql>
+
+    <!-- 查询总数 -->
+    <select id="selectCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        SELECT count(id)
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 查询 -->
+    <select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wusi.reimbursement.entity.IllegalLog" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `uid`,
+            `user_name`,
+            `content`,
+            `create_time`,
+            `reason`,
+            `type`,
+            `source`,
+            `state`,
+            `trace_id`
+        )
+        VALUES(
+            #{id},
+            #{uid},
+            #{userName},
+            #{content},
+            #{createTime},
+            #{reason},
+            #{type},
+            #{source},
+            #{state},
+            #{traceId}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="table"/>
+        (
+            `id`,
+            `uid`,
+            `user_name`,
+            `content`,
+            `create_time`,
+            `reason`,
+            `type`,
+            `source`,
+            `state`,
+            `trace_id`
+        )
+        VALUES
+        <foreach collection="list" item="cm" index="index" separator=",">
+            (
+            #{cm.id},
+            #{cm.uid},
+            #{cm.userName},
+            #{cm.content},
+            #{cm.createTime},
+            #{cm.reason},
+            #{cm.type},
+            #{cm.source},
+            #{cm.state},
+            #{cm.traceId}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE id=#{id}
+    </select>
+
+    <select id="selectByTraceId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="table"/>
+        WHERE trace_id=#{traceId} limit 1
+    </select>
+
+    <update id="updateById" parameterType="com.wusi.reimbursement.entity.IllegalLog">
+        UPDATE
+        <include refid="table"/>
+        <set>
+            <if test="uid != null and uid != ''">
+                 `uid`=#{uid},
+            </if>
+            <if test="userName != null and userName != ''">
+                 `user_name`=#{userName},
+            </if>
+            <if test="content != null and content != ''">
+                 `content`=#{content},
+            </if>
+            <if test="createTime != null">
+                 `create_time`=#{createTime},
+            </if>
+            <if test="reason != null and reason != ''">
+                 `reason`=#{reason},
+            </if>
+            <if test="type != null">
+                 `type`=#{type},
+            </if>
+            <if test="source != null">
+                 `source`=#{source},
+            </if>
+            <if test="state != null">
+                 `state`=#{state},
+            </if>
+            <if test="traceId != null and traceId != ''">
+                 `trace_id`=#{traceId},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+</mapper>
