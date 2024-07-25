@@ -8,10 +8,7 @@ import com.wusi.reimbursement.query.ShuiWenWaterLevelQuery;
 import com.wusi.reimbursement.query.WaterLevelQuery;
 import com.wusi.reimbursement.service.ShuiWenWaterLevelService;
 import com.wusi.reimbursement.service.WaterLevelService;
-import com.wusi.reimbursement.utils.DataUtil;
-import com.wusi.reimbursement.utils.DateUtil;
-import com.wusi.reimbursement.utils.DingDingTalkUtils;
-import com.wusi.reimbursement.utils.MoneyUtil;
+import com.wusi.reimbursement.utils.*;
 import com.wusi.reimbursement.vo.ShuiWenWaterLevelJson;
 import com.wusi.reimbursement.vo.ShuiWenWaterLevelVo;
 import com.wusi.reimbursement.vo.WaterLevelVo;
@@ -57,6 +54,7 @@ public class ShuiWenWaterLevelController {
     @RequestMapping(value = "getTodayData")
     @Scheduled(cron = "0 0 12,23 * * ?")
     public void getTodayData() throws Exception {
+        RedisUtil.del("getIndexWeatherAndWaterLevel");
         log.error("长江水文开始获取水位,{}", sdf.format(new Date()));
         String html = Jsoup.connect("http://www.cjh.com.cn/sqindex.html").execute().body();
         Integer start = html.indexOf("[");

@@ -650,6 +650,33 @@ public class LureController {
         return MoneyUtil.formatMoney(hankou.get(0).getZ());
     }
 
+    @RequestMapping("api/waterDiagram")
+    @ResponseBody
+    @SysLog("获取水位走势")
+    public Response<Page<WaterDiagram>>  getWaterDig(ShuiWenWaterLevelQuery query){
+        if (DataUtil.isEmpty(query.getPage())) {
+            query.setPage(0);
+        }
+        if (DataUtil.isEmpty(query.getLimit())) {
+            query.setLimit(10);
+        }
+        Pageable pageable = PageRequest.of(query.getPage(), query.getLimit());
+        Page<ShuiWenWaterLevel> page = shuiWenWaterLevelService.queryPage(query, pageable);
+        List<WaterDiagram> voList = new ArrayList<>();
+        for (ShuiWenWaterLevel waterLevel : page.getContent()) {
+            voList.add(getWaterDiagram(waterLevel));
+        }
+        Page<WaterDiagram> voPage = new PageImpl<>(voList, pageable, page.getTotalElements());
+        return Response.ok(voPage);
+    }
+
+    private WaterDiagram getWaterDiagram(ShuiWenWaterLevel waterLevel) {
+        WaterDiagram vo=new WaterDiagram();
+        vo.setDate(format2.format(waterLevel.getCreateTime()));
+        vo.setValue(getLevel(waterLevel));
+        return vo;
+    }
+
 
     @RequestMapping(value = "/api/getIndexWeatherAndWaterLevelNow")
     @ResponseBody
